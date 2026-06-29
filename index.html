@@ -619,49 +619,19 @@
 
     <!-- ─── ESTEIRA DE KPIs ─── -->
     <section class="kpi-strip">
-        <div class="kpi-card" style="--kpi-accent:var(--primary)">
-            <p class="kpi-label">Atendimentos no Mês</p>
-            <p class="kpi-value" id="kpi-total" style="color:var(--primary)">0</p>
-            <p class="kpi-sub" id="kpi-total-sub">no período</p>
-        </div>
-        <div class="kpi-card" style="--kpi-accent:var(--success)">
-            <p class="kpi-label">Dentro do SLA</p>
-            <p class="kpi-value" id="kpi-sla" style="color:var(--success)">0%</p>
-            <p class="kpi-sub" id="kpi-sla-sub">0 de 0</p>
-        </div>
-        <div class="kpi-card" style="--kpi-accent:var(--danger)">
-            <p class="kpi-label">Fora do SLA</p>
-            <p class="kpi-value" id="kpi-fora-sla" style="color:var(--danger)">0</p>
-            <p class="kpi-sub" id="kpi-fora-sla-sub">0% do total</p>
-        </div>
-        <div class="kpi-card" style="--kpi-accent:var(--success)">
-            <p class="kpi-label">Avaliação Positiva</p>
-            <p class="kpi-value" id="kpi-pos" style="color:var(--success)">0%</p>
-            <p class="kpi-sub" id="kpi-pos-sub">0 de 0</p>
-        </div>
-        <div class="kpi-card" style="--kpi-accent:var(--teal)">
-            <p class="kpi-label">Tempo Médio</p>
-            <p class="kpi-value" id="kpi-tempo" style="color:var(--teal)">0h</p>
-            <p class="kpi-sub" id="kpi-tempo-sub">mediana</p>
-        </div>
-        <div class="kpi-card" style="--kpi-accent:var(--warning)">
-            <p class="kpi-label">Cancelamentos</p>
-            <p class="kpi-value" id="kpi-canc" style="color:var(--warning)">0</p>
-            <p class="kpi-sub" id="kpi-canc-sub">0% do total</p>
-        </div>
         <div class="kpi-card" style="--kpi-accent:var(--purple)">
             <p class="kpi-label">Top Motivo</p>
-            <p class="kpi-value" id="kpi-top-motivo" style="color:var(--purple);font-size:14px;">—</p>
+            <p class="kpi-value" id="kpi-top-motivo" style="color:var(--purple);font-size:13px;">—</p>
             <p class="kpi-sub" id="kpi-top-motivo-sub">0 atendimentos</p>
         </div>
         <div class="kpi-card" style="--kpi-accent:var(--primary)">
             <p class="kpi-label">Top Cidade</p>
-            <p class="kpi-value" id="kpi-top-cidade" style="color:var(--primary);font-size:14px;">—</p>
+            <p class="kpi-value" id="kpi-top-cidade" style="color:var(--primary);font-size:13px;">—</p>
             <p class="kpi-sub" id="kpi-top-cidade-sub">0 atendimentos</p>
         </div>
         <div class="kpi-card" style="--kpi-accent:var(--teal)">
             <p class="kpi-label">Top Plano</p>
-            <p class="kpi-value" id="kpi-top-plano" style="color:var(--teal);font-size:14px;">—</p>
+            <p class="kpi-value" id="kpi-top-plano" style="color:var(--teal);font-size:13px;">—</p>
             <p class="kpi-sub" id="kpi-top-plano-sub">0 atendimentos</p>
         </div>
         <div class="kpi-card" style="--kpi-accent:var(--warning)">
@@ -669,17 +639,22 @@
             <p class="kpi-value" id="kpi-pico" style="color:var(--warning)">—</p>
             <p class="kpi-sub" id="kpi-pico-sub">aberturas concentradas</p>
         </div>
-        <div class="kpi-card" style="--kpi-accent:var(--success)">
-            <p class="kpi-label">Resolvido em ≤ 1h</p>
-            <p class="kpi-value" id="kpi-rapido" style="color:var(--success)">0</p>
-            <p class="kpi-sub" id="kpi-rapido-sub">0% do total</p>
-        </div>
         <div class="kpi-card" style="--kpi-accent:var(--danger)">
-            <p class="kpi-label">Tempo Máximo</p>
-            <p class="kpi-value" id="kpi-max" style="color:var(--danger)">0h</p>
-            <p class="kpi-sub" id="kpi-max-sub">caso mais longo</p>
+            <p class="kpi-label">Estouro Médio do SLA</p>
+            <p class="kpi-value" id="kpi-estouro" style="color:var(--danger)">—</p>
+            <p class="kpi-sub" id="kpi-estouro-sub">nos casos "Fora do SLA"</p>
+        </div>
+        <div class="kpi-card" style="--kpi-accent:var(--warning)">
+            <p class="kpi-label">Cancelamentos</p>
+            <p class="kpi-value" id="kpi-canc" style="color:var(--warning)">0</p>
+            <p class="kpi-sub" id="kpi-canc-sub">0% do total</p>
         </div>
     </section>
+
+    <!-- ─── FILTROS ─── -->
+    <div id="filter-info-bar" style="display:none;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#FBBF24;font-weight:500;">
+        📅 <strong>Filtros ativos</strong> <span id="filter-info-text"></span>
+    </div>
 
     <!-- ─── FILTROS ─── -->
     <div class="filter-bar">
@@ -753,7 +728,7 @@
             <div id="chart-horas"></div>
         </div>
 
-        <!-- Linha 4: Satisfação (PÓS) + Tempo por Plano -->
+        <!-- Linha 4: Satisfação (PÓS) + Distribuição por Atendente + Tempo por Plano -->
         <div class="chart-card span4">
             <div class="chart-title">
                 Satisfação (PÓS) — Distribuição
@@ -761,9 +736,16 @@
             </div>
             <div id="chart-pos"></div>
         </div>
-        <div class="chart-card span8">
+        <div class="chart-card span4">
             <div class="chart-title">
-                Tempo Médio de Atendimento por Plano
+                Distribuição por Atendente
+                <span class="chart-tag">DONUT</span>
+            </div>
+            <div id="chart-atendente"></div>
+        </div>
+        <div class="chart-card span4">
+            <div class="chart-title">
+                Tempo Médio por Plano
                 <span class="chart-tag">BAR</span>
             </div>
             <div id="chart-tempo-plano"></div>
@@ -823,8 +805,8 @@
                         <th>Protocolo</th>
                         <th>Cliente</th>
                         <th>Cidade</th>
-                        <th>Plano</th>
                         <th>Processo</th>
+                        <th>Resolução</th>
                         <th>Atendente</th>
                         <th>Tempo</th>
                         <th>SLA</th>
@@ -1124,7 +1106,32 @@ const ui = {
         engine.filters.plano     = document.getElementById('filter-plano').value;
         engine.filters.operador  = document.getElementById('filter-operador').value;
         engine.applyFilters();
+        this.updateFilterInfo();
         this.renderAll();
+    },
+
+    /* Indica visualmente quais filtros estão ativos no topo do dashboard */
+    updateFilterInfo() {
+        const f = engine.filters;
+        const partes = [];
+        if (f.dateStart || f.dateEnd) {
+            const ini = f.dateStart ? f.dateStart.split('-').reverse().join('/') : '...';
+            const fim = f.dateEnd   ? f.dateEnd.split('-').reverse().join('/')   : '...';
+            partes.push(`Período: ${ini} → ${fim}`);
+        }
+        if (f.cidade)   partes.push(`Cidade: ${f.cidade}`);
+        if (f.processo) partes.push(`Processo: ${f.processo}`);
+        if (f.plano)    partes.push(`Plano: ${f.plano}`);
+        if (f.operador) partes.push(`Atendente: ${f.operador}`);
+
+        const bar = document.getElementById('filter-info-bar');
+        const txt = document.getElementById('filter-info-text');
+        if (partes.length === 0) {
+            bar.style.display = 'none';
+        } else {
+            bar.style.display = 'block';
+            txt.innerHTML = '· ' + partes.join(' · ');
+        }
     },
 
     clearFilters() {
@@ -1133,6 +1140,7 @@ const ui = {
         });
         engine.filters = { dateStart:'', dateEnd:'', cidade:'', processo:'', plano:'', operador:'' };
         engine.applyFilters();
+        this.updateFilterInfo();
         this.renderAll();
     },
 
@@ -1164,6 +1172,68 @@ const ui = {
         const tempos   = data.map(d => d.tempoMinutos).filter(t => t != null && t > 0).sort((a,b)=>a-b);
         const mediana  = tempos.length ? tempos[Math.floor(tempos.length / 2)] : 0;
 
+        // ── COMPARAÇÃO COM MÊS ANTERIOR ──
+        // Usa o mês mais recente dos dados filtrados como "atual" e o anterior como base
+        const mesesUnicos = [...new Set(engine.data.map(d => d.data ? `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(2,'0')}` : null).filter(Boolean))].sort();
+        const mesAtual = mesesUnicos[mesesUnicos.length-1];
+        const mesAnt   = mesesUnicos[mesesUnicos.length-2];
+
+        let comparacao = { total:null, sla:null, pos:null, tempo:null };
+        if (mesAtual && mesAnt) {
+            const fAtual = engine.data.filter(d => d.data && `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(2,'0')}` === mesAtual);
+            const fAnt   = engine.data.filter(d => d.data && `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(2,'0')}` === mesAnt);
+
+            // Total
+            comparacao.total = { atual: fAtual.length, anterior: fAnt.length };
+
+            // SLA
+            const sOkA = fAtual.filter(d => d.slaCumprido === 'Dentro do SLA').length;
+            const sFoA = fAtual.filter(d => d.slaCumprido === 'Fora do SLA').length;
+            const sAA = sOkA + sFoA;
+            const pctA = sAA ? (sOkA/sAA*100) : null;
+
+            const sOkB = fAnt.filter(d => d.slaCumprido === 'Dentro do SLA').length;
+            const sFoB = fAnt.filter(d => d.slaCumprido === 'Fora do SLA').length;
+            const sAB = sOkB + sFoB;
+            const pctB = sAB ? (sOkB/sAB*100) : null;
+
+            comparacao.sla = { atual: pctA, anterior: pctB };
+
+            // PÓS
+            const pOkA = fAtual.filter(d => d.pos === 'VERDADEIRO').length;
+            const pNeA = fAtual.filter(d => d.pos === 'FALSO').length;
+            const pAA = pOkA + pNeA;
+            const pAtA = pAA ? (pOkA/pAA*100) : null;
+
+            const pOkB = fAnt.filter(d => d.pos === 'VERDADEIRO').length;
+            const pNeB = fAnt.filter(d => d.pos === 'FALSO').length;
+            const pAB = pOkB + pNeB;
+            const pAtB = pAB ? (pOkB/pAB*100) : null;
+
+            comparacao.pos = { atual: pAtA, anterior: pAtB };
+
+            // Tempo (mediana)
+            const tA = fAtual.map(d => d.tempoMinutos).filter(t => t != null && t > 0).sort((a,b)=>a-b);
+            const medA = tA.length ? tA[Math.floor(tA.length/2)] : null;
+            const tB = fAnt.map(d => d.tempoMinutos).filter(t => t != null && t > 0).sort((a,b)=>a-b);
+            const medB = tB.length ? tB[Math.floor(tB.length/2)] : null;
+
+            comparacao.tempo = { atual: medA, anterior: medB };
+        }
+
+        // Helper pra renderizar comparação (↑↓→)
+        const compTxt = (atual, anterior, modo='alto', formatter=null) => {
+            if (atual == null || anterior == null) return '';
+            const diff = atual - anterior;
+            const diffPct = anterior !== 0 ? (diff/anterior*100) : 0;
+            const arrow  = Math.abs(diffPct) < 1 ? '→' : (diff > 0 ? '↑' : '↓');
+            // modo='alto' → subir é bom (SLA, PÓS). modo='baixo' → descer é bom (Tempo, volume)
+            const isGood = modo === 'alto' ? diff >= 0 : diff <= 0;
+            const cor = Math.abs(diffPct) < 1 ? '#94A3B8' : (isGood ? '#34D399' : '#F87171');
+            const formatted = formatter ? formatter(Math.abs(diff)) : Math.abs(diffPct).toFixed(0) + '%';
+            return `<span style="color:${cor};font-weight:600;">${arrow} ${formatted} vs mês anterior</span>`;
+        };
+
         const status = (val, bench, modo='alto') => {
             if (modo === 'baixo') {
                 if (val < bench.excelente) return { label:'EXCELENTE', cor:'#34D399' };
@@ -1185,7 +1255,7 @@ const ui = {
                 value: total,
                 status: '',
                 statusColor: '',
-                sub: total === 1 ? '1 chamado' : `${total} chamados`,
+                sub: comparacao.total ? compTxt(comparacao.total.atual, comparacao.total.anterior, 'baixo') : `${total} chamado${total!==1?'s':''}`,
                 cor: '#60A5FA'
             },
             {
@@ -1193,7 +1263,9 @@ const ui = {
                 value: slaAval ? pctSla.toFixed(1).replace('.',',') + '%' : '—',
                 status: slaAval ? sSla.label : '',
                 statusColor: sSla.cor,
-                sub: slaAval ? `${slaOk} de ${slaAval} avaliados` : 'sem avaliação',
+                sub: comparacao.sla && comparacao.sla.atual != null && comparacao.sla.anterior != null
+                    ? compTxt(comparacao.sla.atual, comparacao.sla.anterior, 'alto', diff => diff.toFixed(1).replace('.',',') + 'pp')
+                    : (slaAval ? `${slaOk} de ${slaAval} avaliados` : 'sem avaliação'),
                 cor: slaAval ? sSla.cor : '#94A3B8',
                 valueColor: slaAval ? sSla.cor : '#94A3B8'
             },
@@ -1202,7 +1274,9 @@ const ui = {
                 value: posAval ? pctPos.toFixed(1).replace('.',',') + '%' : '—',
                 status: posAval ? sPos.label : '',
                 statusColor: sPos.cor,
-                sub: posAval ? `${posOk} positivas de ${posAval}` : 'sem avaliação',
+                sub: comparacao.pos && comparacao.pos.atual != null && comparacao.pos.anterior != null
+                    ? compTxt(comparacao.pos.atual, comparacao.pos.anterior, 'alto', diff => diff.toFixed(1).replace('.',',') + 'pp')
+                    : (posAval ? `${posOk} positivas de ${posAval}` : 'sem avaliação'),
                 cor: posAval ? sPos.cor : '#94A3B8',
                 valueColor: posAval ? sPos.cor : '#94A3B8'
             },
@@ -1211,7 +1285,9 @@ const ui = {
                 value: this.fmtTempo(mediana),
                 status: tempos.length ? sTempo.label : '',
                 statusColor: sTempo.cor,
-                sub: tempos.length ? `mediana de ${tempos.length} atendimentos` : 'sem dados',
+                sub: comparacao.tempo && comparacao.tempo.atual != null && comparacao.tempo.anterior != null
+                    ? compTxt(comparacao.tempo.atual, comparacao.tempo.anterior, 'baixo', diff => this.fmtTempo(diff))
+                    : (tempos.length ? `mediana de ${tempos.length} atendimentos` : 'sem dados'),
                 cor: tempos.length ? sTempo.cor : '#94A3B8',
                 valueColor: tempos.length ? sTempo.cor : '#94A3B8'
             }
@@ -1231,19 +1307,6 @@ const ui = {
     renderKPIs() {
         const data = engine.filtered;
         const total = data.length;
-
-        const slaOk = data.filter(d => d.slaCumprido === 'Dentro do SLA').length;
-        const slaFora = data.filter(d => d.slaCumprido === 'Fora do SLA').length;
-        const slaAval = slaOk + slaFora;
-
-        const posOk = data.filter(d => d.pos === 'VERDADEIRO').length;
-        const posNeg = data.filter(d => d.pos === 'FALSO').length;
-        const posAval = posOk + posNeg;
-
-        const tempos = data.map(d => d.tempoMinutos).filter(t => t != null && t > 0).sort((a,b)=>a-b);
-        const mediana = tempos.length ? tempos[Math.floor(tempos.length / 2)] : 0;
-        const maxT = tempos.length ? tempos[tempos.length-1] : 0;
-        const rapidos = tempos.filter(t => t <= 60).length;
 
         const cancela = data.filter(d => /CANCEL/.test(d.processo)).length;
 
@@ -1266,25 +1329,22 @@ const ui = {
         const horas = {};
         data.forEach(d => { if (d.abertura) horas[d.abertura.getHours()] = (horas[d.abertura.getHours()]||0) + 1; });
         const topHora = Object.entries(horas).sort((a,b) => b[1] - a[1])[0];
-        const horaTxt = topHora ? `${String(topHora[0]).padStart(2,'0')}h` : '—';
+        const horaTxt = topHora ? `${String(topHora[0]).padStart(2,'0')}h–${String(+topHora[0]+1).padStart(2,'0')}h` : '—';
         const horaQtd = topHora ? topHora[1] : 0;
 
+        // Estouro médio do SLA — quanto tempo (em média) os "Fora do SLA" passaram do prazo
+        const forasSla = data.filter(d => d.slaCumprido === 'Fora do SLA' && d.tempoMinutos != null && d.slaContratadoMin > 0);
+        let estouroTxt = '—', estouroSub = 'nenhum caso "Fora"';
+        if (forasSla.length) {
+            const estouros = forasSla.map(d => d.tempoMinutos - d.slaContratadoMin).filter(x => x > 0);
+            if (estouros.length) {
+                const medEstouro = estouros.reduce((a,b) => a+b, 0) / estouros.length;
+                estouroTxt = this.fmtTempo(medEstouro);
+                estouroSub = `média entre ${forasSla.length} caso${forasSla.length !== 1 ? 's' : ''}`;
+            }
+        }
+
         const $ = id => document.getElementById(id);
-        $('kpi-total').innerText = total;
-        $('kpi-total-sub').innerText = total === 1 ? '1 chamado' : `${total} chamados`;
-
-        $('kpi-sla').innerText = slaAval ? (slaOk/slaAval*100).toFixed(1).replace('.',',') + '%' : '—';
-        $('kpi-sla-sub').innerText = slaAval ? `${slaOk} de ${slaAval} avaliados` : 'sem avaliação';
-
-        $('kpi-fora-sla').innerText = slaFora;
-        $('kpi-fora-sla-sub').innerText = slaAval ? `${(slaFora/slaAval*100).toFixed(1).replace('.',',')}% dos avaliados` : '0%';
-
-        $('kpi-pos').innerText = posAval ? (posOk/posAval*100).toFixed(1).replace('.',',') + '%' : '—';
-        $('kpi-pos-sub').innerText = posAval ? `${posOk} positivas de ${posAval}` : 'sem avaliação';
-
-        $('kpi-tempo').innerText = this.fmtTempo(mediana);
-        $('kpi-tempo-sub').innerText = tempos.length ? `mediana de ${tempos.length}` : 'sem dados';
-
         $('kpi-canc').innerText = cancela;
         $('kpi-canc-sub').innerText = total ? `${(cancela/total*100).toFixed(1).replace('.',',')}% do total` : '0%';
 
@@ -1298,13 +1358,10 @@ const ui = {
         $('kpi-top-plano-sub').innerText = `${topPlano[1]} atendimento${topPlano[1] !== 1 ? 's' : ''}`;
 
         $('kpi-pico').innerText = horaTxt;
-        $('kpi-pico-sub').innerText = horaQtd ? `${horaQtd} aberturas` : 'sem dados';
+        $('kpi-pico-sub').innerText = horaQtd ? `${horaQtd} aberturas neste horário` : 'sem dados';
 
-        $('kpi-rapido').innerText = rapidos;
-        $('kpi-rapido-sub').innerText = total ? `${(rapidos/total*100).toFixed(1).replace('.',',')}% resolvidos ≤ 1h` : '0%';
-
-        $('kpi-max').innerText = this.fmtTempo(maxT);
-        $('kpi-max-sub').innerText = 'caso mais longo';
+        $('kpi-estouro').innerText = estouroTxt;
+        $('kpi-estouro-sub').innerText = estouroSub;
     },
 
     /* ── CHARTS ── */
@@ -1628,19 +1685,65 @@ const ui = {
                 }
             }
         });
+
+        // ════════════ 8. DISTRIBUIÇÃO POR ATENDENTE (donut neutro — sem ranking) ════════════
+        const operadores = {};
+        const idsPorOperador = {};
+        data.forEach(d => {
+            if (!d.operador) return;
+            operadores[d.operador] = (operadores[d.operador]||0) + 1;
+            (idsPorOperador[d.operador] = idsPorOperador[d.operador] || []).push(d);
+        });
+        const opSorted = Object.entries(operadores).sort((a,b) => b[1]-a[1]);
+        const opKeys = opSorted.map(o => o[0]);
+        const opTotal = opSorted.reduce((a,b)=>a+b[1], 0);
+        this.chart('chart-atendente', {
+            chart: {
+                type:'donut', height:300, foreColor:'#94A3B8', background:'transparent',
+                events: {
+                    dataPointSelection: (e,c,cfg) => this.openModal('atendente', opKeys[cfg.dataPointIndex], idsPorOperador[opKeys[cfg.dataPointIndex]])
+                }
+            },
+            series: opSorted.map(o => o[1]),
+            labels: opKeys,
+            colors: ['#60A5FA','#2DD4BF','#818CF8','#FBBF24','#F472B6','#34D399','#A78BFA','#FB7185'],
+            legend: { position:'bottom', fontSize:'11px', fontWeight:600, labels:{colors:'#94A3B8'}, markers:{width:10,height:10,radius:3} },
+            dataLabels: { enabled:true, style:{fontSize:'13px',fontWeight:700,colors:['#fff']},
+                          formatter: (val) => Math.round(val) + '%' },
+            stroke: { width: 0 },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size:'68%',
+                        labels: {
+                            show:true,
+                            name: { show:true, fontSize:'12px', color:'#94A3B8', fontWeight:600 },
+                            value: { show:true, fontSize:'22px', color:'#fff', fontWeight:700, offsetY:8 },
+                            total: {
+                                show:true, label:'Total', color:'#94A3B8',
+                                fontSize:'11px', fontWeight:600,
+                                formatter: () => opTotal
+                            }
+                        }
+                    }
+                }
+            },
+            tooltip: { theme:'dark', y:{ formatter: v => `${v} atendimento${v!==1?'s':''}` } }
+        });
     },
 
     /* ── MODAL — popup com lista filtrada ao clicar em qualquer gráfico ── */
     openModal(tipo, label, lista) {
         if (!lista || !lista.length) return;
         const titulos = {
-            evolucao: `Atendimentos do dia ${label}`,
-            sla:      `Atendimentos — ${label}`,
-            motivo:   `Motivo: ${label}`,
-            cidade:   `Cidade: ${label}`,
-            hora:     `Aberturas às ${label}`,
-            pos:      `Satisfação ${label}`,
-            plano:    `Plano: ${label}`
+            evolucao:  `Atendimentos do dia ${label}`,
+            sla:       `Atendimentos — ${label}`,
+            motivo:    `Motivo: ${label}`,
+            cidade:    `Cidade: ${label}`,
+            hora:      `Aberturas às ${label}`,
+            pos:       `Satisfação ${label}`,
+            plano:     `Plano: ${label}`,
+            atendente: `Atendente: ${label}`
         };
         document.getElementById('modal-title').innerText = titulos[tipo] || label;
         document.getElementById('modal-subtitle').innerText = `${lista.length} atendimento${lista.length !== 1 ? 's' : ''} encontrado${lista.length !== 1 ? 's' : ''}`;
@@ -1657,13 +1760,14 @@ const ui = {
                 : d.pos === 'FALSO'
                     ? '<span class="badge badge-danger">Negativo</span>'
                     : '<span class="badge badge-warning">—</span>';
+            const resolText = (d.resolucao || '—').length > 80 ? (d.resolucao || '').substring(0,80) + '…' : (d.resolucao || '—');
             return `<tr>
                 <td>${d.dataStr || '—'}</td>
                 <td>${d.protocolo || '—'}</td>
                 <td>${d.nome || '—'}</td>
                 <td>${d.cidade || '—'}</td>
-                <td>${d.plano || '—'}</td>
                 <td>${d.processo || '—'}</td>
+                <td title="${(d.resolucao || '').replace(/"/g, '&quot;')}" style="max-width:280px;font-size:11px;color:#94A3B8;">${resolText}</td>
                 <td>${d.operador || '—'}</td>
                 <td>${this.fmtTempo(d.tempoMinutos)}</td>
                 <td>${slaBadge}</td>
