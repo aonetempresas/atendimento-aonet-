@@ -386,8 +386,170 @@
         .badge-danger  { background: rgba(248,113,113,0.15); color: var(--danger); }
         .badge-warning { background: rgba(251,191,36,0.15); color: var(--warning); }
 
+        /* ─── SCROLL HORIZONTAL pra gráficos com muitos items (Top Motivos / Cidades) ─── */
+        .chart-scroll-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 8px;
+        }
+        .chart-scroll-container::-webkit-scrollbar { height: 8px; }
+        .chart-scroll-container::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 10px; }
+        .chart-scroll-container::-webkit-scrollbar-thumb { background: rgba(96,165,250,0.4); border-radius: 10px; }
+        .chart-scroll-container::-webkit-scrollbar-thumb:hover { background: rgba(96,165,250,0.6); }
+        .chart-inner { min-width: 100%; }
+
+        /* ─── MODAL — popup ao clicar nos gráficos ─── */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--bg-deep);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 1200px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+            color: var(--text-main);
+        }
+        .modal-header p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 22px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            transition: color 0.2s;
+        }
+        .modal-close:hover { color: var(--danger); }
+        .modal-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .modal-table th {
+            text-align: left;
+            padding: 9px 8px;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(15,23,42,0.6);
+            position: sticky;
+            top: 0;
+        }
+        .modal-table td {
+            padding: 9px 8px;
+            border-bottom: 1px solid rgba(148,163,184,0.06);
+            color: var(--text-main);
+        }
+        .modal-table tr:hover td { background: rgba(96,165,250,0.04); }
+
+        /* ─── INSIGHTS 360 ─── */
+        .insights-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 22px 24px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 24px;
+        }
+        .insights-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .insights-subtitle {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+        }
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+        .insight-card {
+            background: rgba(15,23,42,0.4);
+            border: 1px solid var(--card-border);
+            border-left: 3px solid var(--insight-accent, var(--primary));
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+        .insight-card h4 {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--insight-accent, var(--primary));
+            margin: 0 0 6px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .insight-card p {
+            font-size: 13px;
+            line-height: 1.55;
+            color: var(--text-main);
+            margin: 0;
+        }
+        .insight-card .insight-action {
+            margin-top: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-style: italic;
+            line-height: 1.4;
+        }
+        @media (max-width: 900px) {
+            .insights-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ─── Hover sutil em gráficos ─── */
+        .chart-card {
+            transition: border-color 0.2s;
+        }
+        .chart-card:hover {
+            border-color: rgba(96,165,250,0.25);
+        }
+
         /* ─── LOADER ─── */
-        .loader {
             position: fixed;
             inset: 0;
             background: var(--bg-deep);
@@ -541,11 +703,16 @@
             <label>Plano</label>
             <select id="filter-plano" onchange="ui.applyFilter()"></select>
         </div>
+        <div class="filter-item">
+            <label>Atendente</label>
+            <select id="filter-operador" onchange="ui.applyFilter()"></select>
+        </div>
         <button class="filter-clear" onclick="ui.clearFilters()">✕ Limpar Filtros</button>
     </div>
 
     <!-- ─── GRÁFICOS ─── -->
     <div class="chart-grid">
+        <!-- Linha 1: Evolução + SLA Donut -->
         <div class="chart-card span8">
             <div class="chart-title">
                 Evolução Diária de Atendimentos
@@ -561,37 +728,40 @@
             <div id="chart-sla"></div>
         </div>
 
+        <!-- Linha 2: Top Motivos + Top Cidades (lado a lado com scroll horizontal) -->
         <div class="chart-card span6">
             <div class="chart-title">
                 Top Motivos de Atendimento
-                <span class="chart-tag">BAR</span>
+                <span class="chart-tag">BAR · SCROLL</span>
             </div>
-            <div id="chart-motivos"></div>
+            <div class="chart-scroll-container"><div id="chart-motivos" class="chart-inner"></div></div>
         </div>
         <div class="chart-card span6">
             <div class="chart-title">
+                Top Cidades
+                <span class="chart-tag">BAR · SCROLL</span>
+            </div>
+            <div class="chart-scroll-container"><div id="chart-cidades" class="chart-inner"></div></div>
+        </div>
+
+        <!-- Linha 3: Distribuição por Hora (largura total + formato área igual evolução) -->
+        <div class="chart-card span12">
+            <div class="chart-title">
                 Distribuição por Hora do Dia
-                <span class="chart-tag">HEATMAP</span>
+                <span class="chart-tag">AREA</span>
             </div>
             <div id="chart-horas"></div>
         </div>
 
-        <div class="chart-card span6">
-            <div class="chart-title">
-                Top Cidades
-                <span class="chart-tag">BAR</span>
-            </div>
-            <div id="chart-cidades"></div>
-        </div>
-        <div class="chart-card span6">
+        <!-- Linha 4: Satisfação (PÓS) + Tempo por Plano -->
+        <div class="chart-card span4">
             <div class="chart-title">
                 Satisfação (PÓS) — Distribuição
-                <span class="chart-tag">PIE</span>
+                <span class="chart-tag">DONUT</span>
             </div>
             <div id="chart-pos"></div>
         </div>
-
-        <div class="chart-card span12">
+        <div class="chart-card span8">
             <div class="chart-title">
                 Tempo Médio de Atendimento por Plano
                 <span class="chart-tag">BAR</span>
@@ -601,6 +771,13 @@
     </div>
 
     <!-- ─── TABELA ─── -->
+    <!-- ─── INSIGHTS 360 ─── -->
+    <div class="insights-section">
+        <div class="insights-title">💡 Insights 360 — Análise para Otimização</div>
+        <div class="insights-subtitle">Análises automáticas baseadas nos dados atuais — atualizadas a cada sincronização</div>
+        <div class="insights-grid" id="insights-grid"></div>
+    </div>
+
     <div class="table-card">
         <div class="chart-title">
             Detalhamento dos Atendimentos
@@ -626,6 +803,38 @@
         </div>
     </div>
 
+</div>
+
+<!-- ─── MODAL — popup com lista de atendimentos ao clicar nos gráficos ─── -->
+<div class="modal" id="modal" onclick="if(event.target===this) ui.closeModal()">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>
+                <h2 id="modal-title">Detalhes</h2>
+                <p id="modal-subtitle"></p>
+            </div>
+            <button class="modal-close" onclick="ui.closeModal()">✕</button>
+        </div>
+        <div style="overflow-x:auto;">
+            <table class="modal-table" id="modal-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Protocolo</th>
+                        <th>Cliente</th>
+                        <th>Cidade</th>
+                        <th>Plano</th>
+                        <th>Processo</th>
+                        <th>Atendente</th>
+                        <th>Tempo</th>
+                        <th>SLA</th>
+                        <th>PÓS</th>
+                    </tr>
+                </thead>
+                <tbody id="modal-tbody"></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -689,7 +898,7 @@ class AtendimentoEngine {
         this.url = url;
         this.data = [];
         this.filtered = [];
-        this.filters = { dateStart:'', dateEnd:'', cidade:'', processo:'', plano:'' };
+        this.filters = { dateStart:'', dateEnd:'', cidade:'', processo:'', plano:'', operador:'' };
     }
 
     splitLine(line) {
@@ -831,7 +1040,7 @@ class AtendimentoEngine {
     }
 
     applyFilters() {
-        const { dateStart, dateEnd, cidade, processo, plano } = this.filters;
+        const { dateStart, dateEnd, cidade, processo, plano, operador } = this.filters;
         const sd = dateStart ? new Date(dateStart+'T00:00:00') : null;
         const ed = dateEnd   ? new Date(dateEnd  +'T23:59:59') : null;
 
@@ -841,6 +1050,7 @@ class AtendimentoEngine {
             if (cidade   && d.cidade !== cidade) return false;
             if (processo && d.processo !== processo) return false;
             if (plano    && d.plano !== plano) return false;
+            if (operador && d.operador !== operador) return false;
             return true;
         });
     }
@@ -889,9 +1099,10 @@ const ui = {
     },
 
     populateFilters() {
-        const cidades = [...new Set(engine.data.map(d => d.cidade).filter(Boolean))].sort();
-        const procs   = [...new Set(engine.data.map(d => d.processo).filter(Boolean))].sort();
-        const planos  = [...new Set(engine.data.map(d => d.plano).filter(Boolean))].sort();
+        const cidades  = [...new Set(engine.data.map(d => d.cidade).filter(Boolean))].sort();
+        const procs    = [...new Set(engine.data.map(d => d.processo).filter(Boolean))].sort();
+        const planos   = [...new Set(engine.data.map(d => d.plano).filter(Boolean))].sort();
+        const operadores = [...new Set(engine.data.map(d => d.operador).filter(Boolean))].sort();
 
         const fill = (id, items) => {
             const el = document.getElementById(id);
@@ -902,6 +1113,7 @@ const ui = {
         fill('filter-cidade', cidades);
         fill('filter-processo', procs);
         fill('filter-plano', planos);
+        fill('filter-operador', operadores);
     },
 
     applyFilter() {
@@ -910,15 +1122,16 @@ const ui = {
         engine.filters.cidade    = document.getElementById('filter-cidade').value;
         engine.filters.processo  = document.getElementById('filter-processo').value;
         engine.filters.plano     = document.getElementById('filter-plano').value;
+        engine.filters.operador  = document.getElementById('filter-operador').value;
         engine.applyFilters();
         this.renderAll();
     },
 
     clearFilters() {
-        ['filter-start','filter-end','filter-cidade','filter-processo','filter-plano'].forEach(id => {
+        ['filter-start','filter-end','filter-cidade','filter-processo','filter-plano','filter-operador'].forEach(id => {
             document.getElementById(id).value = '';
         });
-        engine.filters = { dateStart:'', dateEnd:'', cidade:'', processo:'', plano:'' };
+        engine.filters = { dateStart:'', dateEnd:'', cidade:'', processo:'', plano:'', operador:'' };
         engine.applyFilters();
         this.renderAll();
     },
@@ -928,6 +1141,7 @@ const ui = {
         this.renderKPIs();
         this.renderCharts();
         this.renderTable();
+        this.renderInsights();
     },
 
     /* ── PULSO OPERACIONAL ── */
@@ -1097,12 +1311,14 @@ const ui = {
     renderCharts() {
         const data = engine.filtered;
 
-        // 1. Evolução Diária (line) — atendimentos por dia
+        // ════════════ 1. EVOLUÇÃO DIÁRIA (line/area com markers clicáveis) ════════════
         const porDia = {};
+        const idsPorDia = {};  // guarda ids dos atendimentos por dia (pra clique)
         data.forEach(d => {
             if (!d.data) return;
             const key = d.dataStr;
             porDia[key] = (porDia[key]||0) + 1;
+            (idsPorDia[key] = idsPorDia[key] || []).push(d);
         });
         const dias = Object.keys(porDia).sort((a,b) => {
             const [da,ma,ya] = a.split('/').map(Number);
@@ -1111,123 +1327,544 @@ const ui = {
         });
 
         this.chart('chart-evolucao', {
-            chart: { type:'area', height:280, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent', animations:{enabled:true,speed:400} },
+            chart: {
+                type:'area', height:280, toolbar:{show:false},
+                foreColor:'#94A3B8', background:'transparent',
+                animations:{enabled:true,speed:400},
+                events: {
+                    dataPointSelection: (e,c,cfg) => this.openModal('evolucao', dias[cfg.dataPointIndex], idsPorDia[dias[cfg.dataPointIndex]]),
+                    markerClick:         (e,c,cfg) => this.openModal('evolucao', dias[cfg.dataPointIndex], idsPorDia[dias[cfg.dataPointIndex]]),
+                    click:               (e,c,cfg) => {
+                        if (cfg && typeof cfg.dataPointIndex === 'number' && cfg.dataPointIndex >= 0) {
+                            this.openModal('evolucao', dias[cfg.dataPointIndex], idsPorDia[dias[cfg.dataPointIndex]]);
+                        }
+                    }
+                }
+            },
             series: [{ name:'Atendimentos', data: dias.map(d => porDia[d]) }],
             xaxis: { categories: dias, labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
             yaxis: { labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
             colors: ['#60A5FA'],
             stroke: { curve:'smooth', width:2.5 },
             fill:   { type:'gradient', gradient:{shadeIntensity:1, opacityFrom:0.3, opacityTo:0} },
+            markers: { size:6, colors:['#60A5FA'], strokeColors:'#1E293B', strokeWidth:2, fillOpacity:1, shape:'circle',
+                       hover:{size:10, sizeOffset:4} },
             grid:   { borderColor:'rgba(148,163,184,0.1)' },
             dataLabels: { enabled:false },
-            tooltip: { theme:'dark' }
+            tooltip: {
+                theme:'dark',
+                custom: ({dataPointIndex}) => {
+                    const k = dias[dataPointIndex]; if (!k) return '';
+                    return `<div style="padding:10px;background:#1E293B;border:1px solid #334155;border-radius:8px;">
+                        <div style="font-size:11px;color:#94A3B8;margin-bottom:4px;">${k}</div>
+                        <div style="font-weight:700;color:#fff;">${porDia[k]} atendimento${porDia[k]!==1?'s':''}</div>
+                        <div style="font-size:10px;color:#FBBF24;margin-top:6px;font-style:italic;">👆 Clique para ver lista</div>
+                    </div>`;
+                }
+            }
         });
 
-        // 2. SLA Donut
-        const slaOk    = data.filter(d => d.slaCumprido === 'Dentro do SLA').length;
-        const slaFora  = data.filter(d => d.slaCumprido === 'Fora do SLA').length;
+        // ════════════ 2. SLA DONUT (melhorado) ════════════
+        const slaOkArr   = data.filter(d => d.slaCumprido === 'Dentro do SLA');
+        const slaForaArr = data.filter(d => d.slaCumprido === 'Fora do SLA');
+        const slaOk = slaOkArr.length, slaFora = slaForaArr.length;
+        const slaTotal = slaOk + slaFora;
+        const slaPct = slaTotal ? (slaOk/slaTotal*100).toFixed(1).replace('.',',') : '0';
         this.chart('chart-sla', {
-            chart: { type:'donut', height:280, foreColor:'#94A3B8', background:'transparent' },
+            chart: {
+                type:'donut', height:280, foreColor:'#94A3B8', background:'transparent',
+                events: {
+                    dataPointSelection: (e,c,cfg) => {
+                        const arr = cfg.dataPointIndex === 0 ? slaOkArr : slaForaArr;
+                        const label = cfg.dataPointIndex === 0 ? 'Dentro do SLA' : 'Fora do SLA';
+                        this.openModal('sla', label, arr);
+                    }
+                }
+            },
             series: [slaOk, slaFora],
             labels: ['Dentro do SLA', 'Fora do SLA'],
             colors: ['#34D399', '#F87171'],
-            legend: { position:'bottom', fontSize:'12px' },
-            dataLabels: { enabled:true, style:{fontSize:'13px',fontWeight:700,colors:['#fff']} },
-            plotOptions: { pie:{ donut:{ size:'62%', labels:{show:true, total:{show:true, label:'Total', color:'#94A3B8'}} } } },
-            tooltip: { theme:'dark' }
+            legend: { position:'bottom', fontSize:'12px', fontWeight:600, labels:{colors:'#94A3B8'}, markers:{width:10,height:10,radius:3} },
+            dataLabels: { enabled:true, style:{fontSize:'14px',fontWeight:700,colors:['#fff']},
+                          formatter: (val) => Math.round(val) + '%' },
+            stroke: { width: 0 },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size:'70%',
+                        labels: {
+                            show:true,
+                            name: { show:true, fontSize:'13px', color:'#94A3B8', fontWeight:600 },
+                            value: { show:true, fontSize:'24px', color:'#fff', fontWeight:700, offsetY:8,
+                                     formatter: v => v },
+                            total: {
+                                show:true, label:'SLA Atingido', color:'#94A3B8',
+                                fontSize:'12px', fontWeight:600,
+                                formatter: () => slaPct + '%'
+                            }
+                        }
+                    }
+                }
+            },
+            tooltip: { theme:'dark', y:{ formatter: v => `${v} atendimento${v!==1?'s':''}` } }
         });
 
-        // 3. Top motivos
+        // ════════════ 3. TOP MOTIVOS (bar VERTICAL com scroll horizontal) ════════════
         const motivos = {};
-        data.forEach(d => { if (d.processo) motivos[d.processo] = (motivos[d.processo]||0) + 1; });
-        const motivosSorted = Object.entries(motivos).sort((a,b) => b[1]-a[1]).slice(0, 10);
+        const idsPorMotivo = {};
+        data.forEach(d => {
+            if (!d.processo) return;
+            motivos[d.processo] = (motivos[d.processo]||0) + 1;
+            (idsPorMotivo[d.processo] = idsPorMotivo[d.processo] || []).push(d);
+        });
+        const motivosSorted = Object.entries(motivos).sort((a,b) => b[1]-a[1]);
+        const motivosKeys = motivosSorted.map(m => m[0]);
+        // largura dinâmica: 80px por motivo (mínimo do container = 100%)
+        const motivosWidth = Math.max(100, motivosSorted.length * 80);
+        document.getElementById('chart-motivos').style.minWidth = motivosWidth + 'px';
+
         this.chart('chart-motivos', {
-            chart: { type:'bar', height:320, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent' },
+            chart: {
+                type:'bar', height:320, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent',
+                events: {
+                    dataPointSelection: (e,c,cfg) => this.openModal('motivo', motivosKeys[cfg.dataPointIndex], idsPorMotivo[motivosKeys[cfg.dataPointIndex]])
+                }
+            },
             series: [{ name:'Atendimentos', data: motivosSorted.map(m => m[1]) }],
-            xaxis: { categories: motivosSorted.map(m => m[0]), labels:{ style:{colors:'#94A3B8',fontSize:'10px'} } },
+            xaxis: {
+                categories: motivosKeys,
+                labels:{ style:{colors:'#94A3B8',fontSize:'10px'}, rotate:-30, hideOverlappingLabels:false, trim:false, maxHeight:80 }
+            },
             yaxis: { labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
-            plotOptions: { bar:{ horizontal:true, barHeight:'70%', borderRadius:6 } },
-            colors: ['#818CF8'],
-            dataLabels: { enabled:true, style:{fontSize:'11px',colors:['#fff']} },
+            plotOptions: { bar:{ columnWidth:'62%', borderRadius:6, distributed:true } },
+            colors: ['#818CF8','#60A5FA','#2DD4BF','#34D399','#FBBF24','#F87171','#A78BFA','#FB7185','#FCD34D','#22D3EE','#4ADE80','#F472B6'],
+            dataLabels: { enabled:true, style:{fontSize:'11px',colors:['#fff']}, offsetY:-18 },
             grid: { borderColor:'rgba(148,163,184,0.1)' },
-            tooltip: { theme:'dark' }
+            legend: { show:false },
+            tooltip: {
+                theme:'dark',
+                custom: ({dataPointIndex}) => {
+                    const k = motivosKeys[dataPointIndex]; if (!k) return '';
+                    return `<div style="padding:10px;background:#1E293B;border:1px solid #334155;border-radius:8px;">
+                        <div style="font-size:11px;color:#94A3B8;margin-bottom:4px;">${k}</div>
+                        <div style="font-weight:700;color:#fff;">${motivos[k]} atendimento${motivos[k]!==1?'s':''}</div>
+                        <div style="font-size:10px;color:#FBBF24;margin-top:6px;font-style:italic;">👆 Clique para ver lista</div>
+                    </div>`;
+                }
+            }
         });
 
-        // 4. Horários (heatmap simulado via barras)
-        const horas = Array(24).fill(0);
-        data.forEach(d => { if (d.abertura) horas[d.abertura.getHours()]++; });
-        const horasLabels = [...Array(24).keys()].map(h => String(h).padStart(2,'0') + 'h');
-        this.chart('chart-horas', {
-            chart: { type:'bar', height:320, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent' },
-            series: [{ name:'Aberturas', data: horas }],
-            xaxis: { categories: horasLabels, labels:{ style:{colors:'#94A3B8',fontSize:'10px'} } },
-            yaxis: { labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
-            plotOptions: { bar:{ columnWidth:'70%', borderRadius:4, distributed:false } },
-            colors: ['#2DD4BF'],
-            dataLabels: { enabled:false },
-            grid: { borderColor:'rgba(148,163,184,0.1)' },
-            tooltip: { theme:'dark' }
-        });
-
-        // 5. Top cidades
+        // ════════════ 4. TOP CIDADES (bar VERTICAL com scroll horizontal) ════════════
         const cidades = {};
-        data.forEach(d => { if (d.cidade) cidades[d.cidade] = (cidades[d.cidade]||0) + 1; });
-        const cidSorted = Object.entries(cidades).sort((a,b) => b[1]-a[1]).slice(0, 10);
+        const idsPorCidade = {};
+        data.forEach(d => {
+            if (!d.cidade) return;
+            cidades[d.cidade] = (cidades[d.cidade]||0) + 1;
+            (idsPorCidade[d.cidade] = idsPorCidade[d.cidade] || []).push(d);
+        });
+        const cidSorted = Object.entries(cidades).sort((a,b) => b[1]-a[1]);
+        const cidKeys = cidSorted.map(c => c[0]);
+        const cidWidth = Math.max(100, cidSorted.length * 80);
+        document.getElementById('chart-cidades').style.minWidth = cidWidth + 'px';
+
         this.chart('chart-cidades', {
-            chart: { type:'bar', height:320, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent' },
+            chart: {
+                type:'bar', height:320, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent',
+                events: {
+                    dataPointSelection: (e,c,cfg) => this.openModal('cidade', cidKeys[cfg.dataPointIndex], idsPorCidade[cidKeys[cfg.dataPointIndex]])
+                }
+            },
             series: [{ name:'Atendimentos', data: cidSorted.map(c => c[1]) }],
-            xaxis: { categories: cidSorted.map(c => c[0]), labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
+            xaxis: {
+                categories: cidKeys,
+                labels:{ style:{colors:'#94A3B8',fontSize:'10px'}, rotate:-30, hideOverlappingLabels:false, trim:false, maxHeight:80 }
+            },
             yaxis: { labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
-            plotOptions: { bar:{ horizontal:true, barHeight:'70%', borderRadius:6 } },
-            colors: ['#60A5FA'],
-            dataLabels: { enabled:true, style:{fontSize:'11px',colors:['#fff']} },
+            plotOptions: { bar:{ columnWidth:'62%', borderRadius:6, distributed:true } },
+            colors: ['#60A5FA','#2DD4BF','#34D399','#818CF8','#FBBF24','#F87171','#A78BFA','#FB7185','#FCD34D','#22D3EE','#4ADE80','#F472B6'],
+            dataLabels: { enabled:true, style:{fontSize:'11px',colors:['#fff']}, offsetY:-18 },
             grid: { borderColor:'rgba(148,163,184,0.1)' },
-            tooltip: { theme:'dark' }
+            legend: { show:false },
+            tooltip: {
+                theme:'dark',
+                custom: ({dataPointIndex}) => {
+                    const k = cidKeys[dataPointIndex]; if (!k) return '';
+                    return `<div style="padding:10px;background:#1E293B;border:1px solid #334155;border-radius:8px;">
+                        <div style="font-size:11px;color:#94A3B8;margin-bottom:4px;">${k}</div>
+                        <div style="font-weight:700;color:#fff;">${cidades[k]} atendimento${cidades[k]!==1?'s':''}</div>
+                        <div style="font-size:10px;color:#FBBF24;margin-top:6px;font-style:italic;">👆 Clique para ver lista</div>
+                    </div>`;
+                }
+            }
         });
 
-        // 6. PÓS Pie
-        const posOk    = data.filter(d => d.pos === 'VERDADEIRO').length;
-        const posNeg   = data.filter(d => d.pos === 'FALSO').length;
+        // ════════════ 5. DISTRIBUIÇÃO POR HORA (formato área igual evolução) ════════════
+        const horasMap = Array(24).fill(0).map(() => []);
+        data.forEach(d => { if (d.abertura) horasMap[d.abertura.getHours()].push(d); });
+        const horas = horasMap.map(arr => arr.length);
+        const horasLabels = [...Array(24).keys()].map(h => String(h).padStart(2,'0') + 'h');
+
+        this.chart('chart-horas', {
+            chart: {
+                type:'area', height:300, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent',
+                animations:{enabled:true,speed:400},
+                events: {
+                    dataPointSelection: (e,c,cfg) => this.openModal('hora', `${String(cfg.dataPointIndex).padStart(2,'0')}h`, horasMap[cfg.dataPointIndex]),
+                    markerClick:         (e,c,cfg) => this.openModal('hora', `${String(cfg.dataPointIndex).padStart(2,'0')}h`, horasMap[cfg.dataPointIndex]),
+                    click:               (e,c,cfg) => {
+                        if (cfg && typeof cfg.dataPointIndex === 'number' && cfg.dataPointIndex >= 0) {
+                            this.openModal('hora', `${String(cfg.dataPointIndex).padStart(2,'0')}h`, horasMap[cfg.dataPointIndex]);
+                        }
+                    }
+                }
+            },
+            series: [{ name:'Aberturas', data: horas }],
+            xaxis: { categories: horasLabels, labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
+            yaxis: { labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
+            colors: ['#2DD4BF'],
+            stroke: { curve:'smooth', width:2.5 },
+            fill:   { type:'gradient', gradient:{shadeIntensity:1, opacityFrom:0.35, opacityTo:0} },
+            markers: { size:6, colors:['#2DD4BF'], strokeColors:'#1E293B', strokeWidth:2, fillOpacity:1, shape:'circle',
+                       hover:{size:10, sizeOffset:4} },
+            grid: { borderColor:'rgba(148,163,184,0.1)' },
+            dataLabels: { enabled:false },
+            tooltip: {
+                theme:'dark',
+                custom: ({dataPointIndex}) => {
+                    const k = horasLabels[dataPointIndex]; if (!k) return '';
+                    return `<div style="padding:10px;background:#1E293B;border:1px solid #334155;border-radius:8px;">
+                        <div style="font-size:11px;color:#94A3B8;margin-bottom:4px;">Horário: ${k}</div>
+                        <div style="font-weight:700;color:#fff;">${horas[dataPointIndex]} abertura${horas[dataPointIndex]!==1?'s':''}</div>
+                        <div style="font-size:10px;color:#FBBF24;margin-top:6px;font-style:italic;">👆 Clique para ver lista</div>
+                    </div>`;
+                }
+            }
+        });
+
+        // ════════════ 6. PÓS DONUT (melhorado, igual SLA) ════════════
+        const posOkArr  = data.filter(d => d.pos === 'VERDADEIRO');
+        const posNegArr = data.filter(d => d.pos === 'FALSO');
+        const posOk = posOkArr.length, posNeg = posNegArr.length;
+        const posTotal = posOk + posNeg;
+        const posPct = posTotal ? (posOk/posTotal*100).toFixed(1).replace('.',',') : '0';
         this.chart('chart-pos', {
-            chart: { type:'pie', height:320, foreColor:'#94A3B8', background:'transparent' },
+            chart: {
+                type:'donut', height:300, foreColor:'#94A3B8', background:'transparent',
+                events: {
+                    dataPointSelection: (e,c,cfg) => {
+                        const arr = cfg.dataPointIndex === 0 ? posOkArr : posNegArr;
+                        const label = cfg.dataPointIndex === 0 ? 'Positivo' : 'Negativo';
+                        this.openModal('pos', label, arr);
+                    }
+                }
+            },
             series: [posOk, posNeg],
             labels: ['Positivo', 'Negativo'],
             colors: ['#34D399', '#F87171'],
-            legend: { position:'bottom', fontSize:'12px' },
-            dataLabels: { enabled:true, style:{fontSize:'13px',fontWeight:700,colors:['#fff']} },
-            tooltip: { theme:'dark' }
+            legend: { position:'bottom', fontSize:'12px', fontWeight:600, labels:{colors:'#94A3B8'}, markers:{width:10,height:10,radius:3} },
+            dataLabels: { enabled:true, style:{fontSize:'14px',fontWeight:700,colors:['#fff']},
+                          formatter: (val) => Math.round(val) + '%' },
+            stroke: { width: 0 },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size:'70%',
+                        labels: {
+                            show:true,
+                            name: { show:true, fontSize:'13px', color:'#94A3B8', fontWeight:600 },
+                            value: { show:true, fontSize:'24px', color:'#fff', fontWeight:700, offsetY:8 },
+                            total: {
+                                show:true, label:'Satisfação', color:'#94A3B8',
+                                fontSize:'12px', fontWeight:600,
+                                formatter: () => posPct + '%'
+                            }
+                        }
+                    }
+                }
+            },
+            tooltip: { theme:'dark', y:{ formatter: v => `${v} avaliação${v!==1?'ões':''}` } }
         });
 
-        // 7. Tempo médio por plano
+        // ════════════ 7. TEMPO MÉDIO POR PLANO ════════════
         const planosTempo = {};
+        const idsPorPlano = {};
         data.forEach(d => {
             if (d.plano && d.tempoMinutos != null && d.tempoMinutos > 0) {
                 if (!planosTempo[d.plano]) planosTempo[d.plano] = { soma:0, count:0 };
                 planosTempo[d.plano].soma += d.tempoMinutos;
                 planosTempo[d.plano].count++;
+                (idsPorPlano[d.plano] = idsPorPlano[d.plano] || []).push(d);
             }
         });
         const planosArr = Object.entries(planosTempo)
             .map(([p,v]) => [p, Math.round(v.soma / v.count)])
             .sort((a,b) => b[1]-a[1])
             .slice(0, 12);
+        const planoKeys = planosArr.map(p => p[0]);
         this.chart('chart-tempo-plano', {
-            chart: { type:'bar', height:320, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent' },
+            chart: {
+                type:'bar', height:320, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent',
+                events: {
+                    dataPointSelection: (e,c,cfg) => this.openModal('plano', planoKeys[cfg.dataPointIndex], idsPorPlano[planoKeys[cfg.dataPointIndex]])
+                }
+            },
             series: [{ name:'Tempo médio (minutos)', data: planosArr.map(p => p[1]) }],
-            xaxis: { categories: planosArr.map(p => p[0]), labels:{ style:{colors:'#94A3B8',fontSize:'10px'}, rotate:-30 } },
+            xaxis: { categories: planoKeys, labels:{ style:{colors:'#94A3B8',fontSize:'10px'}, rotate:-30 } },
             yaxis: { labels:{ style:{colors:'#94A3B8',fontSize:'11px'}, formatter: v => v + 'min' } },
             plotOptions: { bar:{ columnWidth:'60%', borderRadius:6 } },
             colors: ['#FBBF24'],
             dataLabels: { enabled:false },
             grid: { borderColor:'rgba(148,163,184,0.1)' },
-            tooltip: { theme:'dark', y:{ formatter: v => ui.fmtTempo(v) } }
+            tooltip: {
+                theme:'dark',
+                custom: ({dataPointIndex}) => {
+                    const k = planoKeys[dataPointIndex]; if (!k) return '';
+                    return `<div style="padding:10px;background:#1E293B;border:1px solid #334155;border-radius:8px;">
+                        <div style="font-size:11px;color:#94A3B8;margin-bottom:4px;">${k}</div>
+                        <div style="font-weight:700;color:#fff;">Tempo médio: ${ui.fmtTempo(planosArr[dataPointIndex][1])}</div>
+                        <div style="font-size:11px;color:#60A5FA;">Baseado em ${idsPorPlano[k].length} atendimento${idsPorPlano[k].length!==1?'s':''}</div>
+                        <div style="font-size:10px;color:#FBBF24;margin-top:6px;font-style:italic;">👆 Clique para ver lista</div>
+                    </div>`;
+                }
+            }
         });
+    },
+
+    /* ── MODAL — popup com lista filtrada ao clicar em qualquer gráfico ── */
+    openModal(tipo, label, lista) {
+        if (!lista || !lista.length) return;
+        const titulos = {
+            evolucao: `Atendimentos do dia ${label}`,
+            sla:      `Atendimentos — ${label}`,
+            motivo:   `Motivo: ${label}`,
+            cidade:   `Cidade: ${label}`,
+            hora:     `Aberturas às ${label}`,
+            pos:      `Satisfação ${label}`,
+            plano:    `Plano: ${label}`
+        };
+        document.getElementById('modal-title').innerText = titulos[tipo] || label;
+        document.getElementById('modal-subtitle').innerText = `${lista.length} atendimento${lista.length !== 1 ? 's' : ''} encontrado${lista.length !== 1 ? 's' : ''}`;
+
+        const sorted = lista.slice().sort((a,b) => (b.data||0) - (a.data||0));
+        document.getElementById('modal-tbody').innerHTML = sorted.map(d => {
+            const slaBadge = d.slaCumprido === 'Dentro do SLA'
+                ? '<span class="badge badge-success">Dentro</span>'
+                : d.slaCumprido === 'Fora do SLA'
+                    ? '<span class="badge badge-danger">Fora</span>'
+                    : '<span class="badge badge-warning">—</span>';
+            const posBadge = d.pos === 'VERDADEIRO'
+                ? '<span class="badge badge-success">Positivo</span>'
+                : d.pos === 'FALSO'
+                    ? '<span class="badge badge-danger">Negativo</span>'
+                    : '<span class="badge badge-warning">—</span>';
+            return `<tr>
+                <td>${d.dataStr || '—'}</td>
+                <td>${d.protocolo || '—'}</td>
+                <td>${d.nome || '—'}</td>
+                <td>${d.cidade || '—'}</td>
+                <td>${d.plano || '—'}</td>
+                <td>${d.processo || '—'}</td>
+                <td>${d.operador || '—'}</td>
+                <td>${this.fmtTempo(d.tempoMinutos)}</td>
+                <td>${slaBadge}</td>
+                <td>${posBadge}</td>
+            </tr>`;
+        }).join('');
+
+        document.getElementById('modal').classList.add('active');
+    },
+
+    closeModal() {
+        document.getElementById('modal').classList.remove('active');
     },
 
     chart(id, opts) {
         if (this.charts[id]) { this.charts[id].destroy(); }
         this.charts[id] = new ApexCharts(document.getElementById(id), opts);
         this.charts[id].render();
+    },
+
+    /* ── INSIGHTS 360 — análises automáticas pra otimização ── */
+    renderInsights() {
+        const data = engine.filtered;
+        const total = data.length;
+        const insights = [];
+
+        if (total === 0) {
+            document.getElementById('insights-grid').innerHTML = `
+                <div class="insight-card" style="--insight-accent:#94A3B8;grid-column:1/-1;">
+                    <p>Sem atendimentos no filtro atual para gerar insights.</p>
+                </div>`;
+            return;
+        }
+
+        // 1. PICO DE HORÁRIO — concentração em janela de horas
+        const horas = Array(24).fill(0);
+        data.forEach(d => { if (d.abertura) horas[d.abertura.getHours()]++; });
+        // Procura a janela de 3h consecutivas com maior volume
+        let maxJanela = 0, inicioJanela = 0;
+        for (let h = 0; h <= 21; h++) {
+            const soma = horas[h] + horas[h+1] + horas[h+2];
+            if (soma > maxJanela) { maxJanela = soma; inicioJanela = h; }
+        }
+        if (maxJanela > 0) {
+            const pctJanela = (maxJanela / total * 100).toFixed(0);
+            if (pctJanela >= 35) {
+                insights.push({
+                    cor: '#FBBF24',
+                    icon: '🕐',
+                    titulo: 'Concentração em horário de pico',
+                    texto: `<strong>${pctJanela}%</strong> dos atendimentos abrem entre <strong>${String(inicioJanela).padStart(2,'0')}h e ${String(inicioJanela+3).padStart(2,'0')}h</strong> (${maxJanela} de ${total}).`,
+                    acao: '💡 Considerar reforçar o time nesse intervalo ou ajustar a escala de operadores.'
+                });
+            }
+        }
+
+        // 2. MOTIVO DOMINANTE — algum motivo passa 30%
+        const motivos = {};
+        data.forEach(d => { if (d.processo) motivos[d.processo] = (motivos[d.processo]||0) + 1; });
+        const topMot = Object.entries(motivos).sort((a,b) => b[1]-a[1])[0];
+        if (topMot) {
+            const pctMot = (topMot[1] / total * 100).toFixed(0);
+            if (pctMot >= 25) {
+                insights.push({
+                    cor: '#818CF8',
+                    icon: '🎯',
+                    titulo: 'Motivo dominante de chamados',
+                    texto: `<strong>"${topMot[0]}"</strong> representa <strong>${pctMot}%</strong> dos atendimentos (${topMot[1]} casos).`,
+                    acao: '💡 Avaliar automação/autoatendimento para esse motivo — pode reduzir volume significativo.'
+                });
+            }
+        }
+
+        // 3. CONCENTRAÇÃO REGIONAL
+        const cidades = {};
+        data.forEach(d => { if (d.cidade) cidades[d.cidade] = (cidades[d.cidade]||0) + 1; });
+        const topCid = Object.entries(cidades).sort((a,b) => b[1]-a[1])[0];
+        if (topCid) {
+            const pctCid = (topCid[1] / total * 100).toFixed(0);
+            if (pctCid >= 30) {
+                insights.push({
+                    cor: '#60A5FA',
+                    icon: '📍',
+                    titulo: 'Concentração geográfica',
+                    texto: `<strong>${topCid[0]}</strong> concentra <strong>${pctCid}%</strong> da demanda (${topCid[1]} chamados).`,
+                    acao: '💡 Maior peso operacional nessa região — considerar atendimento dedicado ou priorização.'
+                });
+            }
+        }
+
+        // 4. SLA — desempenho operacional
+        const slaOk = data.filter(d => d.slaCumprido === 'Dentro do SLA').length;
+        const slaFora = data.filter(d => d.slaCumprido === 'Fora do SLA').length;
+        const slaAval = slaOk + slaFora;
+        if (slaAval > 0) {
+            const pctSla = (slaOk / slaAval * 100);
+            if (pctSla >= 95) {
+                insights.push({
+                    cor: '#34D399',
+                    icon: '✅',
+                    titulo: 'SLA em nível de excelência',
+                    texto: `<strong>${pctSla.toFixed(1).replace('.',',')}%</strong> dos atendimentos avaliados foram resolvidos dentro do prazo contratado.`,
+                    acao: '💡 Manter o padrão operacional. Documentar boas práticas pra escalar a equipe sem perder qualidade.'
+                });
+            } else if (pctSla < 85) {
+                insights.push({
+                    cor: '#F87171',
+                    icon: '⚠️',
+                    titulo: 'SLA abaixo do esperado',
+                    texto: `Apenas <strong>${pctSla.toFixed(1).replace('.',',')}%</strong> dos atendimentos cumpriram o SLA. <strong>${slaFora}</strong> ficaram fora do prazo.`,
+                    acao: '💡 Revisar fluxos de priorização e escalonamento. Identificar gargalos nos motivos mais frequentes.'
+                });
+            }
+        }
+
+        // 5. SATISFAÇÃO (PÓS)
+        const posOk = data.filter(d => d.pos === 'VERDADEIRO').length;
+        const posNeg = data.filter(d => d.pos === 'FALSO').length;
+        const posAval = posOk + posNeg;
+        if (posAval > 0) {
+            const pctPos = (posOk / posAval * 100);
+            if (posNeg >= 5) {
+                insights.push({
+                    cor: '#F87171',
+                    icon: '😟',
+                    titulo: 'Avaliações negativas em volume',
+                    texto: `<strong>${posNeg}</strong> avaliações negativas (PÓS Falso) — <strong>${(posNeg/posAval*100).toFixed(0)}%</strong> dos avaliados.`,
+                    acao: '💡 Revisar cada caso negativo. Pode revelar padrão (mesmo motivo, mesmo atendente, mesmo horário) com causa-raiz.'
+                });
+            } else if (pctPos >= 90) {
+                insights.push({
+                    cor: '#34D399',
+                    icon: '😊',
+                    titulo: 'Satisfação elevada',
+                    texto: `<strong>${pctPos.toFixed(1).replace('.',',')}%</strong> dos clientes avaliados ficaram satisfeitos.`,
+                    acao: '💡 Continuar reforço positivo no time. Coletar depoimentos pode virar material de marketing.'
+                });
+            }
+        }
+
+        // 6. TEMPO DE ATENDIMENTO — outliers críticos
+        const tempos = data.map(d => ({ d, t: d.tempoMinutos })).filter(x => x.t != null && x.t > 0);
+        if (tempos.length) {
+            const tArr = tempos.map(x => x.t).sort((a,b)=>a-b);
+            const mediana = tArr[Math.floor(tArr.length/2)];
+            const maxT = tArr[tArr.length-1];
+            const criticos = tempos.filter(x => x.t > mediana * 5).length;
+            if (criticos > 0 && maxT > 480) {
+                insights.push({
+                    cor: '#FBBF24',
+                    icon: '⏱️',
+                    titulo: 'Casos com tempo crítico',
+                    texto: `<strong>${criticos}</strong> atendimento${criticos!==1?'s':''} com tempo muito acima da mediana. Caso mais longo: <strong>${this.fmtTempo(maxT)}</strong>.`,
+                    acao: '💡 Revisar fluxo de escalonamento para casos críticos. Avaliar se há bloqueio técnico ou processo que pode ser otimizado.'
+                });
+            }
+            if (mediana < 120) {
+                insights.push({
+                    cor: '#34D399',
+                    icon: '⚡',
+                    titulo: 'Tempo de resolução ágil',
+                    texto: `Mediana de <strong>${this.fmtTempo(mediana)}</strong> por atendimento — operação enxuta.`,
+                    acao: '💡 Padrão operacional saudável. Documentar processos pra manter ao escalar.'
+                });
+            }
+        }
+
+        // 7. NÃO PREENCHIDOS — falta de dados nos campos avaliativos
+        const semSla = data.filter(d => !d.slaCumprido).length;
+        const semPos = data.filter(d => !d.pos).length;
+        if (semSla > 0 || semPos > 0) {
+            const max = Math.max(semSla, semPos);
+            const pct = (max / total * 100).toFixed(0);
+            if (pct >= 15) {
+                insights.push({
+                    cor: '#94A3B8',
+                    icon: '📝',
+                    titulo: 'Campos não preenchidos',
+                    texto: `<strong>${semSla}</strong> sem SLA Cumprido, <strong>${semPos}</strong> sem PÓS preenchidos.`,
+                    acao: '💡 Reforçar com a equipe a importância de preencher todos os campos — dados ausentes distorcem indicadores.'
+                });
+            }
+        }
+
+        if (insights.length === 0) {
+            insights.push({
+                cor: '#34D399',
+                icon: '✅',
+                titulo: 'Operação estável',
+                texto: 'Nenhum sinal de alerta nos indicadores principais. Continue monitorando.',
+                acao: '💡 Padrão dentro do esperado em todas as dimensões avaliadas.'
+            });
+        }
+
+        document.getElementById('insights-grid').innerHTML = insights.map(i => `
+            <div class="insight-card" style="--insight-accent:${i.cor}">
+                <h4>${i.icon} ${i.titulo}</h4>
+                <p>${i.texto}</p>
+                <div class="insight-action">${i.acao}</div>
+            </div>
+        `).join('');
     },
 
     /* ── TABELA ── */
