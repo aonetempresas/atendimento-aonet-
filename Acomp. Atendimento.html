@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BI Atendimento — Aonet Corporativo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        :root {
+            --bg-deep: #0F172A;
+            --bg-card: rgba(15, 23, 42, 0.6);
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-border: rgba(148, 163, 184, 0.15);
+            --text-main: #F1F5F9;
+            --text-muted: #94A3B8;
+            --primary: #60A5FA;
+            --teal: #2DD4BF;
+            --success: #34D399;
+            --warning: #FBBF24;
+            --danger: #F87171;
+            --purple: #818CF8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 20% 50%, rgba(96,165,250,0.08) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 80%, rgba(45,212,191,0.05) 0%, transparent 50%);
+        }
+
+        /* ─── HEADER ─── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 24px;
+            background: rgba(15, 23, 42, 0.85);
+            border-bottom: 1px solid var(--card-border);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-brand { display: flex; align-items: center; gap: 14px; }
+        .header-logo {
+            height: 130px;
+            width: auto;
+            max-width: 320px;
+            object-fit: contain;
+            flex-shrink: 0;
+            display: block;
+            margin: -32px -14px -32px -12px;
+        }
+        .header-brand h1 {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+            color: var(--text-main);
+        }
+        .header-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+        }
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .header-right { display: flex; gap: 10px; align-items: center; }
+        .btn-sync, .btn-vendas-toggle, .btn-fullscreen {
+            border-radius: 10px;
+            padding: 9px 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-sync {
+            background: rgba(96,165,250,0.1);
+            color: var(--primary);
+            border: 1px solid rgba(96,165,250,0.3);
+        }
+        .btn-sync:hover {
+            background: rgba(96,165,250,0.2);
+            transform: translateY(-1px);
+        }
+        .btn-vendas-toggle {
+            background: rgba(45,212,191,0.1);
+            color: var(--teal);
+            border: 1px solid rgba(45,212,191,0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-vendas-toggle:hover {
+            background: rgba(45,212,191,0.2);
+            transform: translateY(-1px);
+        }
+        .btn-fullscreen {
+            background: rgba(148,163,184,0.1);
+            color: var(--text-muted);
+            border: 1px solid rgba(148,163,184,0.25);
+        }
+        .btn-fullscreen:hover {
+            background: rgba(148,163,184,0.2);
+            color: var(--text-main);
+            transform: translateY(-1px);
+        }
+
+        /* ─── MAIN ─── */
+        .main { padding: 24px; max-width: 1920px; margin: 0 auto; }
+
+        /* ─── PULSO OPERACIONAL ─── */
+        .main-pulse-row {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .main-pulse-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 90px;
+        }
+        .main-pulse-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            width: 3px;
+            background: var(--pulse-accent, var(--text-muted));
+        }
+        .main-pulse-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            line-height: 1.2;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .main-pulse-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.15;
+            letter-spacing: -0.5px;
+            font-variant-numeric: tabular-nums;
+        }
+        .main-pulse-status {
+            font-size: 11px;
+            font-weight: 700;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .main-pulse-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+        .main-pulse-legend {
+            display: flex;
+            justify-content: flex-end;
+            gap: 18px;
+            margin: -2px 0 18px 0;
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .main-pulse-legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* ─── KPI STRIP ─── */
+        .kpi-strip {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+            width: 100%;
+        }
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 18px 16px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100px;
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--kpi-accent, var(--primary));
+        }
+        .kpi-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 8px;
+        }
+        .kpi-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.3px;
+            line-height: 1.15;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+        .kpi-sub {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            line-height: 1.3;
+            margin-top: auto;
+            padding-top: 6px;
+        }
+
+        /* ─── FILTER BAR ─── */
+        .filter-bar {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .filter-item { display: flex; align-items: center; gap: 8px; }
+        .filter-item label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .filter-item input, .filter-item select {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 6px 10px;
+            color: var(--text-main);
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            min-width: 120px;
+        }
+        .filter-clear {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* ─── CHARTS ─── */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .chart-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            backdrop-filter: blur(10px);
+        }
+        .chart-card.span4 { grid-column: span 4; }
+        .chart-card.span6 { grid-column: span 6; }
+        .chart-card.span8 { grid-column: span 8; }
+        .chart-card.span12 { grid-column: span 12; }
+        .chart-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .chart-tag {
+            font-size: 9px;
+            font-weight: 700;
+            background: rgba(96,165,250,0.15);
+            color: var(--primary);
+            padding: 3px 8px;
+            border-radius: 5px;
+            text-transform: uppercase;
+        }
+
+        /* ─── TABLE ─── */
+        .table-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 24px;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .data-table th {
+            text-align: left;
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .data-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(148,163,184,0.06);
+            color: var(--text-main);
+        }
+        .data-table tr:hover td {
+            background: rgba(96,165,250,0.04);
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .badge-success { background: rgba(52,211,153,0.15); color: var(--success); }
+        .badge-danger  { background: rgba(248,113,113,0.15); color: var(--danger); }
+        .badge-warning { background: rgba(251,191,36,0.15); color: var(--warning); }
+
+        /* ─── LOADER ─── */
+        .loader {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-deep);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+        .loader.hidden { opacity: 0; pointer-events: none; }
+        .loader-logo {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            animation: pulse 1.5s infinite;
+        }
+
+        @media (max-width: 1400px) {
+            .kpi-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        }
+        @media (max-width: 1100px) {
+            .kpi-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .main-pulse-row { grid-template-columns: repeat(2, 1fr); }
+            .chart-card.span4, .chart-card.span6, .chart-card.span8 { grid-column: span 12; }
+        }
+        @media (max-width: 768px) {
+            .main { padding: 16px; }
+            .kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .main-pulse-row { grid-template-columns: 1fr; }
+            .main-pulse-legend { justify-content: flex-start; flex-wrap: wrap; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="loader" id="loader">
+    <div class="loader-logo">A</div>
+</div>
+
+<header class="header">
+    <div class="header-brand">
+        <img class="header-logo" src="Empresas.png" alt="Aonet Empresas" />
+        <div>
+            <h1>BI Atendimento</h1>
+            <div class="header-sub">
+                <div class="sync-dot"></div>
+                <span id="update-time">Sincronizando...</span>
+            </div>
+        </div>
+    </div>
+    <div class="header-right">
+        <button class="btn-fullscreen" onclick="ui.toggleFullscreen()" title="Tela cheia (F11)">⛶ &nbsp;Tela Cheia</button>
+        <button class="btn-sync" onclick="ui.syncAndRender()">⟳ &nbsp;Sincronizar</button>
+    </div>
+</header>
+
+<div class="main">
+
+    <!-- ─── PULSO OPERACIONAL ─── -->
+    <div class="main-pulse-row" id="main-pulse"></div>
+    <div class="main-pulse-legend">
+        <span><span class="legend-dot" style="background:#34D399"></span> Excelente</span>
+        <span><span class="legend-dot" style="background:#FBBF24"></span> Bom</span>
+        <span><span class="legend-dot" style="background:#F87171"></span> Atenção</span>
+    </div>
+
+    <!-- ─── ESTEIRA DE KPIs ─── -->
+    <section class="kpi-strip">
+        <div class="kpi-card" style="--kpi-accent:var(--primary)">
+            <p class="kpi-label">Atendimentos no Mês</p>
+            <p class="kpi-value" id="kpi-total" style="color:var(--primary)">0</p>
+            <p class="kpi-sub" id="kpi-total-sub">no período</p>
+        </div>
+        <div class="kpi-card" style="--kpi-accent:var(--success)">
+            <p class="kpi-label">Dentro do SLA</p>
+            <p class="kpi-value" id="kpi-sla" style="color:var(--success)">0%</p>
+            <p class="kpi-sub" id="kpi-sla-sub">0 de 0</p>
+        </div>
+        <div class="kpi-card" style="--kpi-accent:var(--danger)">
+            <p class="kpi-label">Fora do SLA</p>
+            <p class="kpi-value" id="kpi-fora-sla" style="color:var(--danger)">0</p>
+            <p class="kpi-sub" id="kpi-fora-sla-sub">0% do total</p>
+        </div>
+        <div class="kpi-card" style="--kpi-accent:var(--success)">
+            <p class="kpi-label">Avaliação Positiva</p>
+            <p class="kpi-value" id="kpi-pos" style="color:var(--success)">0%</p>
+            <p class="kpi-sub" id="kpi-pos-sub">0 de 0</p>
+        </div>
+        <div class="kpi-card" style="--kpi-accent:var(--teal)">
+            <p class="kpi-label">Tempo Médio</p>
+            <p class="kpi-value" id="kpi-tempo" style="color:var(--teal)">0h</p>
+            <p class="kpi-sub" id="kpi-tempo-sub">mediana</p>
+        </div>
+        <div class="kpi-card" style="--kpi-accent:var(--warning)">
+            <p class="kpi-label">Cancelamentos</p>
+            <p class="kpi-value" id="kpi-canc" style="color:var(--warning)">0</p>
+            <p class="kpi-sub" id="kpi-canc-sub">0% do total</p>
+        </div>
+        <div class="kpi-card" style="--kpi-accent:var(--purple)">
+            <p class="kpi-label">Top Motivo</p>
+            <p class="kpi-value" id="kpi-top-motivo" style="color:var(--purple);font-size:14px;">—</p>
+            <p class="kpi-sub" id="kpi-top-motivo-sub">0 atendimentos</p>
+        </div>
+        <div class="kpi-card" style="--kpi-accent:var(--primary)">
+            <p class="kpi-label">Top Cidade</p>
+            <p class="kpi-value" id="kpi-top-cidade" style="color:var(--primary);font-size:14px;">—</p>
+            <p class="kpi-sub" id="kpi-top-cidade-sub">0 atendimentos</p>
+        </div>
+        <div class="kpi-card" style="--kpi-accent:var(--teal)">
+            <p class="kpi-label">Top Plano</p>
+            <p class="kpi-value" id="kpi-top-plano" style="color:var(--teal);font-size:14px;">—</p>
+            <p class="kpi-sub" id="kpi-top-plano-sub">0 atendimentos</p>
+        </div>
+        <div class="kpi-card" style="--kpi-accent:var(--warning)">
+            <p class="kpi-label">Pico de Horário</p>
+            <p class="kpi-value" id="kpi-pico" style="color:var(--warning)">—</p>
+            <p class="kpi-sub" id="kpi-pico-sub">aberturas concentradas</p>
+        </div>
+        <div class="kpi-card" style="--kpi-accent:var(--success)">
+            <p class="kpi-label">Resolvido em ≤ 1h</p>
+            <p class="kpi-value" id="kpi-rapido" style="color:var(--success)">0</p>
+            <p class="kpi-sub" id="kpi-rapido-sub">0% do total</p>
+        </div>
+        <div class="kpi-card" style="--kpi-accent:var(--danger)">
+            <p class="kpi-label">Tempo Máximo</p>
+            <p class="kpi-value" id="kpi-max" style="color:var(--danger)">0h</p>
+            <p class="kpi-sub" id="kpi-max-sub">caso mais longo</p>
+        </div>
+    </section>
+
+    <!-- ─── FILTROS ─── -->
+    <div class="filter-bar">
+        <div class="filter-item">
+            <label>Início</label>
+            <input type="date" id="filter-start" onchange="ui.applyFilter()" />
+        </div>
+        <div class="filter-item">
+            <label>Fim</label>
+            <input type="date" id="filter-end" onchange="ui.applyFilter()" />
+        </div>
+        <div class="filter-item">
+            <label>Cidade</label>
+            <select id="filter-cidade" onchange="ui.applyFilter()"></select>
+        </div>
+        <div class="filter-item">
+            <label>Processo</label>
+            <select id="filter-processo" onchange="ui.applyFilter()"></select>
+        </div>
+        <div class="filter-item">
+            <label>Plano</label>
+            <select id="filter-plano" onchange="ui.applyFilter()"></select>
+        </div>
+        <button class="filter-clear" onclick="ui.clearFilters()">✕ Limpar Filtros</button>
+    </div>
+
+    <!-- ─── GRÁFICOS ─── -->
+    <div class="chart-grid">
+        <div class="chart-card span8">
+            <div class="chart-title">
+                Evolução Diária de Atendimentos
+                <span class="chart-tag">LINE</span>
+            </div>
+            <div id="chart-evolucao"></div>
+        </div>
+        <div class="chart-card span4">
+            <div class="chart-title">
+                SLA Cumprido vs Não Cumprido
+                <span class="chart-tag">DONUT</span>
+            </div>
+            <div id="chart-sla"></div>
+        </div>
+
+        <div class="chart-card span6">
+            <div class="chart-title">
+                Top Motivos de Atendimento
+                <span class="chart-tag">BAR</span>
+            </div>
+            <div id="chart-motivos"></div>
+        </div>
+        <div class="chart-card span6">
+            <div class="chart-title">
+                Distribuição por Hora do Dia
+                <span class="chart-tag">HEATMAP</span>
+            </div>
+            <div id="chart-horas"></div>
+        </div>
+
+        <div class="chart-card span6">
+            <div class="chart-title">
+                Top Cidades
+                <span class="chart-tag">BAR</span>
+            </div>
+            <div id="chart-cidades"></div>
+        </div>
+        <div class="chart-card span6">
+            <div class="chart-title">
+                Satisfação (PÓS) — Distribuição
+                <span class="chart-tag">PIE</span>
+            </div>
+            <div id="chart-pos"></div>
+        </div>
+
+        <div class="chart-card span12">
+            <div class="chart-title">
+                Tempo Médio de Atendimento por Plano
+                <span class="chart-tag">BAR</span>
+            </div>
+            <div id="chart-tempo-plano"></div>
+        </div>
+    </div>
+
+    <!-- ─── TABELA ─── -->
+    <div class="table-card">
+        <div class="chart-title">
+            Detalhamento dos Atendimentos
+            <span class="chart-tag" id="table-count">0</span>
+        </div>
+        <div style="overflow-x:auto;max-height:500px;overflow-y:auto;">
+            <table class="data-table" id="data-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Protocolo</th>
+                        <th>Cliente</th>
+                        <th>Cidade</th>
+                        <th>Plano</th>
+                        <th>Processo</th>
+                        <th>Tempo</th>
+                        <th>SLA</th>
+                        <th>PÓS</th>
+                    </tr>
+                </thead>
+                <tbody id="data-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCJxNaFnzfvWMtMABfxpHoo7bL4XtuHia5ZVNWIt3NsQjGtFsZUhAhKZBGeV_fbxSJrAh2A5OdroYZ/pub?output=csv";
+
+const CSV_URL_FERIADOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBH6_CprKZd0Go1LZ7ZbqLAiw8di-b3rtYK65Ww0EIuARR17V9sf3KMzg7kJzbB3GBu68lc03MLhaG/pub?gid=409396125&single=true&output=csv";
+
+/* ════════════════════════════════════════════════
+   ENGINE — Feriados
+════════════════════════════════════════════════ */
+class HolidaysEngine {
+    constructor(url) {
+        this.url = url;
+        this.set = new Set();
+    }
+    async fetch() {
+        try {
+            const res = await fetch(this.url);
+            if (!res.ok) return;
+            const csv = await res.text();
+            this.parse(csv);
+        } catch (e) { console.warn("Feriados:", e); }
+    }
+    parse(csv) {
+        this.set.clear();
+        for (const line of csv.split('\n')) {
+            const m = line.match(/^["\s]*(\d{2}\/\d{2}\/\d{4})/);
+            if (m) this.set.add(m[1]);
+        }
+    }
+    isHoliday(d) {
+        if (!d) return false;
+        const key = d instanceof Date
+            ? `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`
+            : String(d).trim();
+        return this.set.has(key);
+    }
+    isBusinessDay(date) {
+        const dow = date.getDay();
+        if (dow === 0 || dow === 6) return false;
+        return !this.isHoliday(date);
+    }
+    countBusinessDays(ini, fim) {
+        let count = 0;
+        const cur = new Date(ini); cur.setHours(0,0,0,0);
+        const end = new Date(fim); end.setHours(0,0,0,0);
+        while (cur <= end) {
+            if (this.isBusinessDay(cur)) count++;
+            cur.setDate(cur.getDate() + 1);
+        }
+        return count;
+    }
+}
+const holidaysEngine = new HolidaysEngine(CSV_URL_FERIADOS);
+
+/* ════════════════════════════════════════════════
+   ENGINE — Atendimentos
+════════════════════════════════════════════════ */
+class AtendimentoEngine {
+    constructor(url) {
+        this.url = url;
+        this.data = [];
+        this.filtered = [];
+        this.filters = { dateStart:'', dateEnd:'', cidade:'', processo:'', plano:'' };
+    }
+
+    splitLine(line) {
+        const result = []; let cur = ''; let inQ = false;
+        for (let i = 0; i < line.length; i++) {
+            const c = line[i];
+            if (c === '"') { inQ = !inQ; continue; }
+            if (c === ',' && !inQ) { result.push(cur); cur = ''; continue; }
+            cur += c;
+        }
+        result.push(cur);
+        return result.map(s => s.trim());
+    }
+
+    parseDate(s) {
+        if (!s) return null;
+        // Aceita "dd/mm/aaaa" ou "dd/mm/aaaa hh:mm[:ss]"
+        const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?/);
+        if (!m) return null;
+        return new Date(+m[3], +m[2]-1, +m[1], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+    }
+
+    parseSlaContratado(s) {
+        // Formato HH:MM:SS — retorna em minutos
+        if (!s) return 0;
+        const m = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+        if (!m) return 0;
+        return +m[1] * 60 + +m[2] + (+m[3]||0)/60;
+    }
+
+    async sync() {
+        try {
+            const res = await fetch(this.url);
+            if (!res.ok) throw new Error('Falha ao carregar CSV');
+            const csv = await res.text();
+            this.parse(csv);
+            this.applyFilters();
+            return true;
+        } catch(e) {
+            console.error('Sync atendimento falhou:', e);
+            return false;
+        }
+    }
+
+    parse(csv) {
+        const lines = csv.split('\n');
+        if (lines.length < 2) { this.data = []; return; }
+
+        // Procura o cabeçalho — primeira linha que começa com "DATA" ou similar
+        let headerIdx = -1;
+        for (let i = 0; i < lines.length; i++) {
+            if (/^["\s]*DATA\s*,/i.test(lines[i])) { headerIdx = i; break; }
+        }
+        if (headerIdx === -1) headerIdx = 0;
+        const header = this.splitLine(lines[headerIdx]).map(h => h.trim().toUpperCase());
+
+        // Mapeia índices das colunas (tolerante a variações)
+        const find = (names) => {
+            for (const n of names) {
+                const idx = header.findIndex(h => h.includes(n));
+                if (idx >= 0) return idx;
+            }
+            return -1;
+        };
+        const idx = {
+            data:      find(['DATA']),
+            protocolo: find(['PROTOCOLO']),
+            operador:  find(['OPERADOR']),
+            canal:     find(['CANAL']),
+            nome:      find(['NOME','RESPONSAVEL']),
+            cnpj:      find(['CNPJ']),
+            cidade:    find(['CIDADE']),
+            plano:     find(['PLANO']),
+            sla:       find(['SLA']),     // sla contratado (HH:MM:SS) — primeira ocorrência
+            abertura:  find(['ABERTURA']),
+            fechamento:find(['FECHAMENTO']),
+            telefone:  find(['TELEFONE']),
+            processo:  find(['PROCESSO']),
+            resolucao: find(['RESOLUÇ','RESOLUC']),
+            pos:       find(['PÓS','POS']),
+            slaCumprido: header.findIndex(h => h === 'SLA CUMPRIDO'),  // exato
+            obs:       find(['OBSERVA'])
+        };
+
+        // Re-resolve SLA: o find pegou a primeira ocorrência. Mas há duas: SLA (col I) e SLA CUMPRIDO (col P).
+        // Se idx.sla === idx.slaCumprido, prefere a primeira ocorrência (SLA contratado)
+        if (idx.sla === idx.slaCumprido) {
+            // procura a primeira ocorrência "SLA" que NÃO seja "SLA CUMPRIDO"
+            for (let i = 0; i < header.length; i++) {
+                if (header[i] === 'SLA' || (header[i].startsWith('SLA') && !header[i].includes('CUMPR'))) {
+                    idx.sla = i; break;
+                }
+            }
+        }
+
+        const rawRows = lines.slice(headerIdx + 1).map(line => {
+            const v = this.splitLine(line);
+            if (v.length < 5 || !v[idx.protocolo]) return null;
+
+            const abert = this.parseDate(v[idx.abertura]);
+            const fech  = this.parseDate(v[idx.fechamento]);
+            const data  = this.parseDate(v[idx.data]);
+            const tempoMinutos = (abert && fech) ? Math.max(0, (fech - abert) / 60000) : null;
+            const slaContratadoMin = this.parseSlaContratado(v[idx.sla]);
+
+            return {
+                data:       data,
+                dataStr:    v[idx.data],
+                protocolo:  v[idx.protocolo],
+                operador:   (v[idx.operador]||'').toUpperCase().trim(),
+                canal:      (v[idx.canal]||'').toUpperCase().trim(),
+                nome:       v[idx.nome],
+                cnpj:       v[idx.cnpj],
+                cidade:     (v[idx.cidade]||'').toUpperCase().trim(),
+                plano:      (v[idx.plano]||'').toUpperCase().trim(),
+                slaContratadoMin: slaContratadoMin,
+                abertura:   abert,
+                fechamento: fech,
+                telefone:   v[idx.telefone],
+                processo:   this.normalizeProcesso(v[idx.processo]),
+                resolucao:  v[idx.resolucao],
+                pos:        (v[idx.pos]||'').toUpperCase().trim(),  // VERDADEIRO / FALSO
+                slaCumprido: (v[idx.slaCumprido]||'').trim(),       // "Dentro do SLA" / "Fora do SLA"
+                obs:        v[idx.obs] || '',
+                tempoMinutos: tempoMinutos
+            };
+        }).filter(x => x && x.protocolo);
+
+        this.data = rawRows;
+    }
+
+    // Normaliza nomes de processo (tira espaços extras, ajusta variações comuns)
+    normalizeProcesso(s) {
+        if (!s) return '';
+        let p = s.toUpperCase().trim().replace(/\s+/g, ' ');
+        // "DUVIDA SOBRE O BOLETO" → "DUVIDA SOBRE BOLETO"
+        p = p.replace(/^DUVIDA SOBRE O BOLETO$/, 'DUVIDA SOBRE BOLETO');
+        return p;
+    }
+
+    applyFilters() {
+        const { dateStart, dateEnd, cidade, processo, plano } = this.filters;
+        const sd = dateStart ? new Date(dateStart+'T00:00:00') : null;
+        const ed = dateEnd   ? new Date(dateEnd  +'T23:59:59') : null;
+
+        this.filtered = this.data.filter(d => {
+            if (sd && d.data && d.data < sd) return false;
+            if (ed && d.data && d.data > ed) return false;
+            if (cidade   && d.cidade !== cidade) return false;
+            if (processo && d.processo !== processo) return false;
+            if (plano    && d.plano !== plano) return false;
+            return true;
+        });
+    }
+}
+
+const engine = new AtendimentoEngine(CSV_URL);
+
+/* ════════════════════════════════════════════════
+   UI — render + lógica
+════════════════════════════════════════════════ */
+
+const BENCHMARKS = {
+    sla:   { excelente: 95, bom: 85 },   // % atendimentos dentro do SLA
+    pos:   { excelente: 90, bom: 80 },   // % avaliação positiva
+    tempo: { excelente: 120, bom: 240 }  // minutos: <120 excelente, <240 bom, ≥240 atenção
+};
+
+const ui = {
+    charts: {},
+
+    fmt(v) {
+        return v.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+    },
+
+    fmtTempo(minutos) {
+        if (!minutos || minutos <= 0) return '0min';
+        if (minutos < 60) return Math.round(minutos) + 'min';
+        const h = Math.floor(minutos / 60);
+        const m = Math.round(minutos % 60);
+        return m === 0 ? `${h}h` : `${h}h${m.toString().padStart(2,'0')}`;
+    },
+
+    async syncAndRender() {
+        document.getElementById('loader').classList.remove('hidden');
+        document.getElementById('loader').style.display = 'flex';
+        const holiPromise = holidaysEngine.fetch().catch(()=>{});
+        const ok = await engine.sync();
+        await holiPromise;
+        document.getElementById('update-time').innerText = ok
+            ? `Atualizado: ${new Date().toLocaleTimeString('pt-BR').slice(0,8)}`
+            : 'Erro ao sincronizar';
+        this.populateFilters();
+        this.renderAll();
+        document.getElementById('loader').classList.add('hidden');
+        setTimeout(() => document.getElementById('loader').style.display = 'none', 300);
+    },
+
+    populateFilters() {
+        const cidades = [...new Set(engine.data.map(d => d.cidade).filter(Boolean))].sort();
+        const procs   = [...new Set(engine.data.map(d => d.processo).filter(Boolean))].sort();
+        const planos  = [...new Set(engine.data.map(d => d.plano).filter(Boolean))].sort();
+
+        const fill = (id, items) => {
+            const el = document.getElementById(id);
+            const cur = el.value;
+            el.innerHTML = '<option value="">Todos</option>' + items.map(x => `<option value="${x}">${x}</option>`).join('');
+            el.value = cur;
+        };
+        fill('filter-cidade', cidades);
+        fill('filter-processo', procs);
+        fill('filter-plano', planos);
+    },
+
+    applyFilter() {
+        engine.filters.dateStart = document.getElementById('filter-start').value;
+        engine.filters.dateEnd   = document.getElementById('filter-end').value;
+        engine.filters.cidade    = document.getElementById('filter-cidade').value;
+        engine.filters.processo  = document.getElementById('filter-processo').value;
+        engine.filters.plano     = document.getElementById('filter-plano').value;
+        engine.applyFilters();
+        this.renderAll();
+    },
+
+    clearFilters() {
+        ['filter-start','filter-end','filter-cidade','filter-processo','filter-plano'].forEach(id => {
+            document.getElementById(id).value = '';
+        });
+        engine.filters = { dateStart:'', dateEnd:'', cidade:'', processo:'', plano:'' };
+        engine.applyFilters();
+        this.renderAll();
+    },
+
+    renderAll() {
+        this.renderPulse();
+        this.renderKPIs();
+        this.renderCharts();
+        this.renderTable();
+    },
+
+    /* ── PULSO OPERACIONAL ── */
+    renderPulse() {
+        const data = engine.filtered;
+        const total = data.length;
+
+        // Conta só atendimentos com SLA avaliado (Dentro/Fora) — ignora vazios
+        const slaOk    = data.filter(d => d.slaCumprido === 'Dentro do SLA').length;
+        const slaFora  = data.filter(d => d.slaCumprido === 'Fora do SLA').length;
+        const slaAval  = slaOk + slaFora;
+        const pctSla   = slaAval ? (slaOk / slaAval) * 100 : 0;
+
+        // Conta só atendimentos com PÓS avaliado (Verdadeiro/Falso) — ignora vazios
+        const posOk    = data.filter(d => d.pos === 'VERDADEIRO').length;
+        const posNeg   = data.filter(d => d.pos === 'FALSO').length;
+        const posAval  = posOk + posNeg;
+        const pctPos   = posAval ? (posOk / posAval) * 100 : 0;
+
+        const tempos   = data.map(d => d.tempoMinutos).filter(t => t != null && t > 0).sort((a,b)=>a-b);
+        const mediana  = tempos.length ? tempos[Math.floor(tempos.length / 2)] : 0;
+
+        const status = (val, bench, modo='alto') => {
+            if (modo === 'baixo') {
+                if (val < bench.excelente) return { label:'EXCELENTE', cor:'#34D399' };
+                if (val < bench.bom)        return { label:'BOM',       cor:'#FBBF24' };
+                return { label:'ATENÇÃO', cor:'#F87171' };
+            }
+            if (val >= bench.excelente) return { label:'EXCELENTE', cor:'#34D399' };
+            if (val >= bench.bom)       return { label:'BOM',       cor:'#FBBF24' };
+            return { label:'ATENÇÃO', cor:'#F87171' };
+        };
+
+        const sSla   = status(pctSla,  BENCHMARKS.sla);
+        const sPos   = status(pctPos,  BENCHMARKS.pos);
+        const sTempo = status(mediana, BENCHMARKS.tempo, 'baixo');
+
+        const cards = [
+            {
+                emoji:'📅', label:'Atendimentos no Mês',
+                value: total,
+                status: '',
+                statusColor: '',
+                sub: total === 1 ? '1 chamado' : `${total} chamados`,
+                cor: '#60A5FA'
+            },
+            {
+                emoji:'🚦', label:'SLA Atingido',
+                value: slaAval ? pctSla.toFixed(1).replace('.',',') + '%' : '—',
+                status: slaAval ? sSla.label : '',
+                statusColor: sSla.cor,
+                sub: slaAval ? `${slaOk} de ${slaAval} avaliados` : 'sem avaliação',
+                cor: slaAval ? sSla.cor : '#94A3B8',
+                valueColor: slaAval ? sSla.cor : '#94A3B8'
+            },
+            {
+                emoji:'😊', label:'Satisfação (PÓS)',
+                value: posAval ? pctPos.toFixed(1).replace('.',',') + '%' : '—',
+                status: posAval ? sPos.label : '',
+                statusColor: sPos.cor,
+                sub: posAval ? `${posOk} positivas de ${posAval}` : 'sem avaliação',
+                cor: posAval ? sPos.cor : '#94A3B8',
+                valueColor: posAval ? sPos.cor : '#94A3B8'
+            },
+            {
+                emoji:'⏱️', label:'Tempo Médio de Resolução',
+                value: this.fmtTempo(mediana),
+                status: tempos.length ? sTempo.label : '',
+                statusColor: sTempo.cor,
+                sub: tempos.length ? `mediana de ${tempos.length} atendimentos` : 'sem dados',
+                cor: tempos.length ? sTempo.cor : '#94A3B8',
+                valueColor: tempos.length ? sTempo.cor : '#94A3B8'
+            }
+        ];
+
+        document.getElementById('main-pulse').innerHTML = cards.map(c => `
+            <div class="main-pulse-card" style="--pulse-accent:${c.cor}">
+                <div class="main-pulse-label">${c.emoji} ${c.label}</div>
+                <div class="main-pulse-value"${c.valueColor ? ` style="color:${c.valueColor}"` : ''}>${c.value}</div>
+                ${c.status ? `<div class="main-pulse-status" style="color:${c.statusColor}">${c.status}</div>` : ''}
+                <div class="main-pulse-sub">${c.sub}</div>
+            </div>
+        `).join('');
+    },
+
+    /* ── KPIs ── */
+    renderKPIs() {
+        const data = engine.filtered;
+        const total = data.length;
+
+        const slaOk = data.filter(d => d.slaCumprido === 'Dentro do SLA').length;
+        const slaFora = data.filter(d => d.slaCumprido === 'Fora do SLA').length;
+        const slaAval = slaOk + slaFora;
+
+        const posOk = data.filter(d => d.pos === 'VERDADEIRO').length;
+        const posNeg = data.filter(d => d.pos === 'FALSO').length;
+        const posAval = posOk + posNeg;
+
+        const tempos = data.map(d => d.tempoMinutos).filter(t => t != null && t > 0).sort((a,b)=>a-b);
+        const mediana = tempos.length ? tempos[Math.floor(tempos.length / 2)] : 0;
+        const maxT = tempos.length ? tempos[tempos.length-1] : 0;
+        const rapidos = tempos.filter(t => t <= 60).length;
+
+        const cancela = data.filter(d => /CANCEL/.test(d.processo)).length;
+
+        // Top motivo
+        const motivos = {};
+        data.forEach(d => { if (d.processo) motivos[d.processo] = (motivos[d.processo]||0) + 1; });
+        const topMot = Object.entries(motivos).sort((a,b) => b[1] - a[1])[0] || ['—', 0];
+
+        // Top cidade
+        const cidades = {};
+        data.forEach(d => { if (d.cidade) cidades[d.cidade] = (cidades[d.cidade]||0) + 1; });
+        const topCid = Object.entries(cidades).sort((a,b) => b[1] - a[1])[0] || ['—', 0];
+
+        // Top plano
+        const planos = {};
+        data.forEach(d => { if (d.plano) planos[d.plano] = (planos[d.plano]||0) + 1; });
+        const topPlano = Object.entries(planos).sort((a,b) => b[1] - a[1])[0] || ['—', 0];
+
+        // Pico de horário
+        const horas = {};
+        data.forEach(d => { if (d.abertura) horas[d.abertura.getHours()] = (horas[d.abertura.getHours()]||0) + 1; });
+        const topHora = Object.entries(horas).sort((a,b) => b[1] - a[1])[0];
+        const horaTxt = topHora ? `${String(topHora[0]).padStart(2,'0')}h` : '—';
+        const horaQtd = topHora ? topHora[1] : 0;
+
+        const $ = id => document.getElementById(id);
+        $('kpi-total').innerText = total;
+        $('kpi-total-sub').innerText = total === 1 ? '1 chamado' : `${total} chamados`;
+
+        $('kpi-sla').innerText = slaAval ? (slaOk/slaAval*100).toFixed(1).replace('.',',') + '%' : '—';
+        $('kpi-sla-sub').innerText = slaAval ? `${slaOk} de ${slaAval} avaliados` : 'sem avaliação';
+
+        $('kpi-fora-sla').innerText = slaFora;
+        $('kpi-fora-sla-sub').innerText = slaAval ? `${(slaFora/slaAval*100).toFixed(1).replace('.',',')}% dos avaliados` : '0%';
+
+        $('kpi-pos').innerText = posAval ? (posOk/posAval*100).toFixed(1).replace('.',',') + '%' : '—';
+        $('kpi-pos-sub').innerText = posAval ? `${posOk} positivas de ${posAval}` : 'sem avaliação';
+
+        $('kpi-tempo').innerText = this.fmtTempo(mediana);
+        $('kpi-tempo-sub').innerText = tempos.length ? `mediana de ${tempos.length}` : 'sem dados';
+
+        $('kpi-canc').innerText = cancela;
+        $('kpi-canc-sub').innerText = total ? `${(cancela/total*100).toFixed(1).replace('.',',')}% do total` : '0%';
+
+        $('kpi-top-motivo').innerText = topMot[0];
+        $('kpi-top-motivo-sub').innerText = `${topMot[1]} atendimento${topMot[1] !== 1 ? 's' : ''}`;
+
+        $('kpi-top-cidade').innerText = topCid[0];
+        $('kpi-top-cidade-sub').innerText = `${topCid[1]} atendimento${topCid[1] !== 1 ? 's' : ''}`;
+
+        $('kpi-top-plano').innerText = topPlano[0];
+        $('kpi-top-plano-sub').innerText = `${topPlano[1]} atendimento${topPlano[1] !== 1 ? 's' : ''}`;
+
+        $('kpi-pico').innerText = horaTxt;
+        $('kpi-pico-sub').innerText = horaQtd ? `${horaQtd} aberturas` : 'sem dados';
+
+        $('kpi-rapido').innerText = rapidos;
+        $('kpi-rapido-sub').innerText = total ? `${(rapidos/total*100).toFixed(1).replace('.',',')}% resolvidos ≤ 1h` : '0%';
+
+        $('kpi-max').innerText = this.fmtTempo(maxT);
+        $('kpi-max-sub').innerText = 'caso mais longo';
+    },
+
+    /* ── CHARTS ── */
+    renderCharts() {
+        const data = engine.filtered;
+
+        // 1. Evolução Diária (line) — atendimentos por dia
+        const porDia = {};
+        data.forEach(d => {
+            if (!d.data) return;
+            const key = d.dataStr;
+            porDia[key] = (porDia[key]||0) + 1;
+        });
+        const dias = Object.keys(porDia).sort((a,b) => {
+            const [da,ma,ya] = a.split('/').map(Number);
+            const [db,mb,yb] = b.split('/').map(Number);
+            return new Date(ya,ma-1,da) - new Date(yb,mb-1,db);
+        });
+
+        this.chart('chart-evolucao', {
+            chart: { type:'area', height:280, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent', animations:{enabled:true,speed:400} },
+            series: [{ name:'Atendimentos', data: dias.map(d => porDia[d]) }],
+            xaxis: { categories: dias, labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
+            yaxis: { labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
+            colors: ['#60A5FA'],
+            stroke: { curve:'smooth', width:2.5 },
+            fill:   { type:'gradient', gradient:{shadeIntensity:1, opacityFrom:0.3, opacityTo:0} },
+            grid:   { borderColor:'rgba(148,163,184,0.1)' },
+            dataLabels: { enabled:false },
+            tooltip: { theme:'dark' }
+        });
+
+        // 2. SLA Donut
+        const slaOk    = data.filter(d => d.slaCumprido === 'Dentro do SLA').length;
+        const slaFora  = data.filter(d => d.slaCumprido === 'Fora do SLA').length;
+        this.chart('chart-sla', {
+            chart: { type:'donut', height:280, foreColor:'#94A3B8', background:'transparent' },
+            series: [slaOk, slaFora],
+            labels: ['Dentro do SLA', 'Fora do SLA'],
+            colors: ['#34D399', '#F87171'],
+            legend: { position:'bottom', fontSize:'12px' },
+            dataLabels: { enabled:true, style:{fontSize:'13px',fontWeight:700,colors:['#fff']} },
+            plotOptions: { pie:{ donut:{ size:'62%', labels:{show:true, total:{show:true, label:'Total', color:'#94A3B8'}} } } },
+            tooltip: { theme:'dark' }
+        });
+
+        // 3. Top motivos
+        const motivos = {};
+        data.forEach(d => { if (d.processo) motivos[d.processo] = (motivos[d.processo]||0) + 1; });
+        const motivosSorted = Object.entries(motivos).sort((a,b) => b[1]-a[1]).slice(0, 10);
+        this.chart('chart-motivos', {
+            chart: { type:'bar', height:320, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent' },
+            series: [{ name:'Atendimentos', data: motivosSorted.map(m => m[1]) }],
+            xaxis: { categories: motivosSorted.map(m => m[0]), labels:{ style:{colors:'#94A3B8',fontSize:'10px'} } },
+            yaxis: { labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
+            plotOptions: { bar:{ horizontal:true, barHeight:'70%', borderRadius:6 } },
+            colors: ['#818CF8'],
+            dataLabels: { enabled:true, style:{fontSize:'11px',colors:['#fff']} },
+            grid: { borderColor:'rgba(148,163,184,0.1)' },
+            tooltip: { theme:'dark' }
+        });
+
+        // 4. Horários (heatmap simulado via barras)
+        const horas = Array(24).fill(0);
+        data.forEach(d => { if (d.abertura) horas[d.abertura.getHours()]++; });
+        const horasLabels = [...Array(24).keys()].map(h => String(h).padStart(2,'0') + 'h');
+        this.chart('chart-horas', {
+            chart: { type:'bar', height:320, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent' },
+            series: [{ name:'Aberturas', data: horas }],
+            xaxis: { categories: horasLabels, labels:{ style:{colors:'#94A3B8',fontSize:'10px'} } },
+            yaxis: { labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
+            plotOptions: { bar:{ columnWidth:'70%', borderRadius:4, distributed:false } },
+            colors: ['#2DD4BF'],
+            dataLabels: { enabled:false },
+            grid: { borderColor:'rgba(148,163,184,0.1)' },
+            tooltip: { theme:'dark' }
+        });
+
+        // 5. Top cidades
+        const cidades = {};
+        data.forEach(d => { if (d.cidade) cidades[d.cidade] = (cidades[d.cidade]||0) + 1; });
+        const cidSorted = Object.entries(cidades).sort((a,b) => b[1]-a[1]).slice(0, 10);
+        this.chart('chart-cidades', {
+            chart: { type:'bar', height:320, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent' },
+            series: [{ name:'Atendimentos', data: cidSorted.map(c => c[1]) }],
+            xaxis: { categories: cidSorted.map(c => c[0]), labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
+            yaxis: { labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
+            plotOptions: { bar:{ horizontal:true, barHeight:'70%', borderRadius:6 } },
+            colors: ['#60A5FA'],
+            dataLabels: { enabled:true, style:{fontSize:'11px',colors:['#fff']} },
+            grid: { borderColor:'rgba(148,163,184,0.1)' },
+            tooltip: { theme:'dark' }
+        });
+
+        // 6. PÓS Pie
+        const posOk    = data.filter(d => d.pos === 'VERDADEIRO').length;
+        const posNeg   = data.filter(d => d.pos === 'FALSO').length;
+        this.chart('chart-pos', {
+            chart: { type:'pie', height:320, foreColor:'#94A3B8', background:'transparent' },
+            series: [posOk, posNeg],
+            labels: ['Positivo', 'Negativo'],
+            colors: ['#34D399', '#F87171'],
+            legend: { position:'bottom', fontSize:'12px' },
+            dataLabels: { enabled:true, style:{fontSize:'13px',fontWeight:700,colors:['#fff']} },
+            tooltip: { theme:'dark' }
+        });
+
+        // 7. Tempo médio por plano
+        const planosTempo = {};
+        data.forEach(d => {
+            if (d.plano && d.tempoMinutos != null && d.tempoMinutos > 0) {
+                if (!planosTempo[d.plano]) planosTempo[d.plano] = { soma:0, count:0 };
+                planosTempo[d.plano].soma += d.tempoMinutos;
+                planosTempo[d.plano].count++;
+            }
+        });
+        const planosArr = Object.entries(planosTempo)
+            .map(([p,v]) => [p, Math.round(v.soma / v.count)])
+            .sort((a,b) => b[1]-a[1])
+            .slice(0, 12);
+        this.chart('chart-tempo-plano', {
+            chart: { type:'bar', height:320, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent' },
+            series: [{ name:'Tempo médio (minutos)', data: planosArr.map(p => p[1]) }],
+            xaxis: { categories: planosArr.map(p => p[0]), labels:{ style:{colors:'#94A3B8',fontSize:'10px'}, rotate:-30 } },
+            yaxis: { labels:{ style:{colors:'#94A3B8',fontSize:'11px'}, formatter: v => v + 'min' } },
+            plotOptions: { bar:{ columnWidth:'60%', borderRadius:6 } },
+            colors: ['#FBBF24'],
+            dataLabels: { enabled:false },
+            grid: { borderColor:'rgba(148,163,184,0.1)' },
+            tooltip: { theme:'dark', y:{ formatter: v => ui.fmtTempo(v) } }
+        });
+    },
+
+    chart(id, opts) {
+        if (this.charts[id]) { this.charts[id].destroy(); }
+        this.charts[id] = new ApexCharts(document.getElementById(id), opts);
+        this.charts[id].render();
+    },
+
+    /* ── TABELA ── */
+    renderTable() {
+        const data = engine.filtered.slice().sort((a,b) => (b.data||0) - (a.data||0));
+        document.getElementById('table-count').innerText = data.length;
+        const tbody = document.getElementById('data-tbody');
+        if (!data.length) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#94A3B8;padding:24px;">Sem atendimentos no filtro atual</td></tr>';
+            return;
+        }
+        tbody.innerHTML = data.map(d => {
+            const slaBadge = d.slaCumprido === 'Dentro do SLA'
+                ? '<span class="badge badge-success">Dentro</span>'
+                : d.slaCumprido === 'Fora do SLA'
+                    ? '<span class="badge badge-danger">Fora</span>'
+                    : '<span class="badge badge-warning">—</span>';
+            const posBadge = d.pos === 'VERDADEIRO'
+                ? '<span class="badge badge-success">Positivo</span>'
+                : d.pos === 'FALSO'
+                    ? '<span class="badge badge-danger">Negativo</span>'
+                    : '<span class="badge badge-warning">—</span>';
+            return `
+                <tr>
+                    <td>${d.dataStr || '—'}</td>
+                    <td>${d.protocolo || '—'}</td>
+                    <td>${d.nome || '—'}</td>
+                    <td>${d.cidade || '—'}</td>
+                    <td>${d.plano || '—'}</td>
+                    <td>${d.processo || '—'}</td>
+                    <td>${this.fmtTempo(d.tempoMinutos)}</td>
+                    <td>${slaBadge}</td>
+                    <td>${posBadge}</td>
+                </tr>
+            `;
+        }).join('');
+    },
+
+    /* ── Fullscreen ── */
+    toggleFullscreen() {
+        const elem = document.documentElement;
+        const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+        if (!isFs) {
+            if (elem.requestFullscreen)        elem.requestFullscreen();
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            else if (elem.msRequestFullscreen)     elem.msRequestFullscreen();
+        } else {
+            if (document.exitFullscreen)        document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            else if (document.msExitFullscreen)     document.msExitFullscreen();
+        }
+    }
+};
+
+/* ── Init ── */
+ui.syncAndRender();
+setInterval(() => ui.syncAndRender(), 5 * 60 * 1000);
+
+/* ── Fullscreen — atualiza texto do botão ── */
+function updateFullscreenButton() {
+    const btn = document.querySelector('.btn-fullscreen');
+    if (!btn) return;
+    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+    btn.innerHTML = isFs ? '✕ &nbsp;Sair Tela Cheia' : '⛶ &nbsp;Tela Cheia';
+}
+document.addEventListener('fullscreenchange',       updateFullscreenButton);
+document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+document.addEventListener('msfullscreenchange',     updateFullscreenButton);
+</script>
+</body>
+</html>
