@@ -1724,9 +1724,9 @@ const ui = {
                 labels:{ style:{colors:'#94A3B8',fontSize:'10px'}, rotate:-30, hideOverlappingLabels:false, trim:false, maxHeight:80 }
             },
             yaxis: { labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
-            plotOptions: { bar:{ columnWidth:'62%', borderRadius:6, distributed:true } },
+            plotOptions: { bar:{ columnWidth:'62%', borderRadius:6, distributed:true, dataLabels:{position:'top'} } },
             colors: ['#818CF8','#60A5FA','#2DD4BF','#34D399','#FBBF24','#F87171','#A78BFA','#FB7185','#FCD34D','#22D3EE','#4ADE80','#F472B6'],
-            dataLabels: { enabled:true, style:{fontSize:'11px',colors:['#fff']}, offsetY:-18 },
+            dataLabels: { enabled:true, style:{fontSize:'11px',colors:['#94A3B8'],fontWeight:600}, offsetY:-22, formatter: val => val },
             grid: { show: false },
             legend: { show:false },
             tooltip: {
@@ -1768,9 +1768,9 @@ const ui = {
                 labels:{ style:{colors:'#94A3B8',fontSize:'10px'}, rotate:-30, hideOverlappingLabels:false, trim:false, maxHeight:80 }
             },
             yaxis: { labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
-            plotOptions: { bar:{ columnWidth:'62%', borderRadius:6, distributed:true } },
+            plotOptions: { bar:{ columnWidth:'62%', borderRadius:6, distributed:true, dataLabels:{position:'top'} } },
             colors: ['#60A5FA','#2DD4BF','#34D399','#818CF8','#FBBF24','#F87171','#A78BFA','#FB7185','#FCD34D','#22D3EE','#4ADE80','#F472B6'],
-            dataLabels: { enabled:true, style:{fontSize:'11px',colors:['#fff']}, offsetY:-18 },
+            dataLabels: { enabled:true, style:{fontSize:'11px',colors:['#94A3B8'],fontWeight:600}, offsetY:-22, formatter: val => val },
             grid: { show: false },
             legend: { show:false },
             tooltip: {
