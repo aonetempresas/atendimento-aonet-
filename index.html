@@ -268,41 +268,48 @@
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 14px;
-            padding: 14px 18px;
+            padding: 12px 16px;
             margin-bottom: 24px;
             display: flex;
-            gap: 18px;
-            flex-wrap: wrap;
+            gap: 12px;
+            flex-wrap: nowrap;          /* mantém todos na mesma linha */
             align-items: center;
             backdrop-filter: blur(10px);
+            overflow-x: auto;           /* em telas muito estreitas, rola horizontal */
         }
-        .filter-item { display: flex; align-items: center; gap: 8px; }
+        .filter-item { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
         .filter-item label {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
         .filter-item input, .filter-item select {
             background: rgba(15, 23, 42, 0.6);
             border: 1px solid var(--card-border);
             border-radius: 8px;
-            padding: 6px 10px;
+            padding: 6px 8px;
             color: var(--text-main);
-            font-size: 13px;
+            font-size: 12px;
             font-family: 'Inter', sans-serif;
             outline: none;
-            min-width: 120px;
+            min-width: 0;
+            max-width: 160px;
         }
+        .filter-item input[type="date"] { width: 130px; }
         .filter-clear {
             margin-left: auto;
             background: none;
             border: none;
             color: var(--danger);
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+            flex-shrink: 0;
             text-transform: uppercase;
         }
 
@@ -877,31 +884,6 @@
         <div class="insights-grid" id="insights-grid"></div>
     </div>
 
-    <div class="table-card">
-        <div class="chart-title">
-            Detalhamento dos Atendimentos
-            <span class="chart-tag" id="table-count">0</span>
-        </div>
-        <div style="overflow-x:auto;max-height:500px;overflow-y:auto;">
-            <table class="data-table" id="data-table">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Protocolo</th>
-                        <th>Cliente</th>
-                        <th>Cidade</th>
-                        <th>Plano</th>
-                        <th>Processo</th>
-                        <th>Tempo</th>
-                        <th>SLA</th>
-                        <th>PÓS</th>
-                    </tr>
-                </thead>
-                <tbody id="data-tbody"></tbody>
-            </table>
-        </div>
-    </div>
-
 </div>
 
 <!-- ─── MODAL — popup com lista de atendimentos ao clicar nos gráficos ─── -->
@@ -1352,7 +1334,6 @@ const ui = {
         this.renderPulse();
         this.renderKPIs();
         this.renderInsights();
-        this.renderTable();
 
         // E renderiza gráficos no próximo "tick" do navegador — não bloqueia a UI
         // (usuário já vê números/KPIs antes dos gráficos terminarem)
