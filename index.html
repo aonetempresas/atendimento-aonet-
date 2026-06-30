@@ -769,9 +769,9 @@
             <p class="kpi-sub" id="kpi-estouro-sub">nos casos "Fora do SLA"</p>
         </div>
         <div class="kpi-card" style="--kpi-accent:var(--warning)">
-            <p class="kpi-label">Cancelamentos</p>
-            <p class="kpi-value" id="kpi-canc" style="color:var(--warning)">0</p>
-            <p class="kpi-sub" id="kpi-canc-sub">0% do total</p>
+            <p class="kpi-label">Chamados Pendentes</p>
+            <p class="kpi-value" id="kpi-pendentes" style="color:var(--warning)">0</p>
+            <p class="kpi-sub" id="kpi-pendentes-sub">Aberto / Em Andamento / Reaberto</p>
         </div>
     </section>
 
@@ -805,6 +805,10 @@
         <div class="filter-item">
             <label>Atendente</label>
             <select id="filter-operador" onchange="ui.applyFilter()"></select>
+        </div>
+        <div class="filter-item">
+            <label>Status</label>
+            <select id="filter-status" onchange="ui.applyFilter()"></select>
         </div>
         <button class="filter-clear" onclick="ui.clearFilters()">✕ Limpar Filtros</button>
     </div>
@@ -1034,7 +1038,7 @@ class AtendimentoEngine {
         this.url = url;
         this.data = [];
         this.filtered = [];
-        this.filters = { dateStart:'', dateEnd:'', cidade:'', processo:'', plano:'', operador:'' };
+        this.filters = { dateStart:'', dateEnd:'', cidade:'', processo:'', plano:'', operador:'', status:'' };
     }
 
     splitLine(line) {
@@ -1110,48 +1114,61 @@ class AtendimentoEngine {
         const lines = this.splitCsvLines(csv);
         if (lines.length < 2) { this.data = []; return; }
 
-        // Procura o cabeçalho — primeira linha que começa com "DATA" ou similar
+        // Procura o cabeçalho — primeira linha que tem "Data" + "Protocolo" + "Cidade"
+        // (tolerante a maiúsculas/minúsculas e à nova estrutura com título nas linhas 1-3)
         let headerIdx = -1;
-        for (let i = 0; i < lines.length; i++) {
-            if (/^["\s]*DATA\s*,/i.test(lines[i])) { headerIdx = i; break; }
+        for (let i = 0; i < Math.min(lines.length, 15); i++) {
+            const lineUpper = lines[i].toUpperCase();
+            // Deve ter pelo menos DATA, PROTOCOLO e CIDADE separados por vírgula
+            if (/\bDATA\b/.test(lineUpper) && /\bPROTOCOLO\b/.test(lineUpper) && /\bCIDADE\b/.test(lineUpper)) {
+                headerIdx = i;
+                break;
+            }
         }
         if (headerIdx === -1) headerIdx = 0;
         const header = this.splitLine(lines[headerIdx]).map(h => h.trim().toUpperCase());
 
-        // Mapeia índices das colunas (tolerante a variações)
-        const find = (names) => {
-            for (const n of names) {
-                const idx = header.findIndex(h => h.includes(n));
+        // Mapeia índices buscando por nome (tolerante à reordenação e variações)
+        const find = (keys) => {
+            for (const k of keys) {
+                const idx = header.findIndex(h => h === k);
+                if (idx >= 0) return idx;
+            }
+            // Match parcial se exato não funcionou
+            for (const k of keys) {
+                const idx = header.findIndex(h => h.includes(k));
                 if (idx >= 0) return idx;
             }
             return -1;
         };
+
         const idx = {
-            data:      find(['DATA']),
-            protocolo: find(['PROTOCOLO']),
-            operador:  find(['OPERADOR']),
-            canal:     find(['CANAL']),
-            nome:      find(['NOME','RESPONSAVEL']),
-            cnpj:      find(['CNPJ']),
-            cidade:    find(['CIDADE']),
-            plano:     find(['PLANO']),
-            sla:       find(['SLA']),     // sla contratado (HH:MM:SS) — primeira ocorrência
-            abertura:  find(['ABERTURA']),
-            fechamento:find(['FECHAMENTO']),
-            telefone:  find(['TELEFONE']),
-            processo:  find(['PROCESSO']),
-            resolucao: find(['RESOLUÇ','RESOLUC']),
-            pos:       find(['PÓS','POS']),
-            slaCumprido: header.findIndex(h => h === 'SLA CUMPRIDO'),  // exato
-            obs:       find(['OBSERVA'])
+            data:        find(['DATA']),
+            protocolo:   find(['PROTOCOLO']),
+            operador:    find(['ATENDENTE', 'OPERADOR']),   // nova planilha usa ATENDENTE; antiga usava OPERADOR
+            canal:       find(['CANAL']),
+            nome:        find(['NOME/RESPONSÁVEL', 'NOME/RESPONSAVEL', 'NOME', 'RESPONSAVEL']),
+            cnpj:        find(['CNPJ']),
+            cidade:      find(['CIDADE']),
+            plano:       find(['PLANO']),
+            sla:         find(['SLA CONTRATADO', 'SLA']),    // SLA contratado (formato HH:MM:SS)
+            abertura:    find(['ABERTURA']),
+            fechamento:  find(['FECHAMENTO']),
+            tempo:       find(['★ TEMPO ATEND.', 'TEMPO ATEND', 'TEMPO']),  // calculado na planilha
+            telefone:    find(['TELEFONE']),
+            processo:    find(['PROCESSO']),
+            resolucao:   find(['RESOLUÇÃO', 'RESOLUCAO']),
+            status:      find(['STATUS']),                   // NOVO campo
+            pos:         find(['PÓS ATENDIMENTO', 'POS ATENDIMENTO', 'PÓS', 'POS']),
+            slaCumprido: find(['★ SLA CUMPRIDO', 'SLA CUMPRIDO']),
+            obs:         find(['OBSERVAÇÃO', 'OBSERVACAO', 'OBSERVA'])
         };
 
-        // Re-resolve SLA: o find pegou a primeira ocorrência. Mas há duas: SLA (col I) e SLA CUMPRIDO (col P).
-        // Se idx.sla === idx.slaCumprido, prefere a primeira ocorrência (SLA contratado)
-        if (idx.sla === idx.slaCumprido) {
-            // procura a primeira ocorrência "SLA" que NÃO seja "SLA CUMPRIDO"
+        // Defensivo: se "SLA" pegou a mesma coluna que "SLA CUMPRIDO" (caso de cabeçalho ambíguo),
+        // procura a primeira ocorrência de algo com "SLA" que NÃO contenha "CUMPR"
+        if (idx.sla !== -1 && idx.sla === idx.slaCumprido) {
             for (let i = 0; i < header.length; i++) {
-                if (header[i] === 'SLA' || (header[i].startsWith('SLA') && !header[i].includes('CUMPR'))) {
+                if (header[i].includes('SLA') && !header[i].includes('CUMPR')) {
                     idx.sla = i; break;
                 }
             }
@@ -1159,7 +1176,11 @@ class AtendimentoEngine {
 
         const rawRows = lines.slice(headerIdx + 1).map(line => {
             const v = this.splitLine(line);
-            if (v.length < 5 || !v[idx.protocolo]) return null;
+            // Linha inválida se não tem protocolo OU se a coluna data está vazia (linha "fantasma" de planilha)
+            if (v.length < 5 || !v[idx.protocolo] || !v[idx.protocolo].trim()) return null;
+            // Pula linhas com texto não-numérico no protocolo (linhas de título/cabeçalho residual)
+            const protoStr = (v[idx.protocolo]||'').trim();
+            if (!/^\d+/.test(protoStr)) return null;
 
             const abert = this.parseDate(v[idx.abertura]);
             const fech  = this.parseDate(v[idx.fechamento]);
@@ -1183,6 +1204,7 @@ class AtendimentoEngine {
                 telefone:   v[idx.telefone],
                 processo:   this.normalizeProcesso(v[idx.processo]),
                 resolucao:  v[idx.resolucao],
+                status:     (v[idx.status]||'').trim(),              // Aberto / Em Andamento / Resolvido / Cancelado / Reaberto
                 pos:        (v[idx.pos]||'').toUpperCase().trim(),  // VERDADEIRO / FALSO
                 slaCumprido: (v[idx.slaCumprido]||'').trim(),       // "Dentro do SLA" / "Fora do SLA"
                 obs:        v[idx.obs] || '',
@@ -1203,7 +1225,7 @@ class AtendimentoEngine {
     }
 
     applyFilters() {
-        const { dateStart, dateEnd, cidade, processo, plano, operador } = this.filters;
+        const { dateStart, dateEnd, cidade, processo, plano, operador, status } = this.filters;
         const sd = dateStart ? new Date(dateStart+'T00:00:00') : null;
         const ed = dateEnd   ? new Date(dateEnd  +'T23:59:59') : null;
 
@@ -1214,6 +1236,7 @@ class AtendimentoEngine {
             if (processo && d.processo !== processo) return false;
             if (plano    && d.plano !== plano) return false;
             if (operador && d.operador !== operador) return false;
+            if (status   && d.status !== status) return false;
             return true;
         });
     }
@@ -1266,6 +1289,7 @@ const ui = {
         const procs    = [...new Set(engine.data.map(d => d.processo).filter(Boolean))].sort();
         const planos   = [...new Set(engine.data.map(d => d.plano).filter(Boolean))].sort();
         const operadores = [...new Set(engine.data.map(d => d.operador).filter(Boolean))].sort();
+        const statusList = [...new Set(engine.data.map(d => d.status).filter(Boolean))].sort();
 
         const fill = (id, items) => {
             const el = document.getElementById(id);
@@ -1277,6 +1301,7 @@ const ui = {
         fill('filter-processo', procs);
         fill('filter-plano', planos);
         fill('filter-operador', operadores);
+        fill('filter-status', statusList);
     },
 
     applyFilter() {
@@ -1289,6 +1314,7 @@ const ui = {
             engine.filters.processo  = document.getElementById('filter-processo').value;
             engine.filters.plano     = document.getElementById('filter-plano').value;
             engine.filters.operador  = document.getElementById('filter-operador').value;
+            engine.filters.status    = document.getElementById('filter-status').value;
             engine.applyFilters();
             this.updateFilterInfo();
             this.renderAll();
@@ -1308,6 +1334,7 @@ const ui = {
         if (f.processo) partes.push(`Processo: ${f.processo}`);
         if (f.plano)    partes.push(`Plano: ${f.plano}`);
         if (f.operador) partes.push(`Atendente: ${f.operador}`);
+        if (f.status)   partes.push(`Status: ${f.status}`);
 
         const bar = document.getElementById('filter-info-bar');
         const txt = document.getElementById('filter-info-text');
@@ -1320,10 +1347,10 @@ const ui = {
     },
 
     clearFilters() {
-        ['filter-start','filter-end','filter-cidade','filter-processo','filter-plano','filter-operador'].forEach(id => {
+        ['filter-start','filter-end','filter-cidade','filter-processo','filter-plano','filter-operador','filter-status'].forEach(id => {
             document.getElementById(id).value = '';
         });
-        engine.filters = { dateStart:'', dateEnd:'', cidade:'', processo:'', plano:'', operador:'' };
+        engine.filters = { dateStart:'', dateEnd:'', cidade:'', processo:'', plano:'', operador:'', status:'' };
         engine.applyFilters();
         this.updateFilterInfo();
         this.renderAll();
@@ -1497,7 +1524,14 @@ const ui = {
         const data = engine.filtered;
         const total = data.length;
 
-        const cancela = data.filter(d => /CANCEL/.test(d.processo)).length;
+        // Chamados pendentes — status Aberto / Em Andamento / Reaberto
+        const pendentesArr = data.filter(d => /^(ABERTO|EM ANDAMENTO|REABERTO)$/i.test(d.status));
+        const pendentes = pendentesArr.length;
+
+        // Detalha quantos de cada subtipo (pra subtítulo informativo)
+        const abertos = data.filter(d => /^ABERTO$/i.test(d.status)).length;
+        const andamento = data.filter(d => /^EM ANDAMENTO$/i.test(d.status)).length;
+        const reabertos = data.filter(d => /^REABERTO$/i.test(d.status)).length;
 
         // Top motivo
         const motivos = {};
@@ -1534,8 +1568,16 @@ const ui = {
         }
 
         const $ = id => document.getElementById(id);
-        $('kpi-canc').innerText = cancela;
-        $('kpi-canc-sub').innerText = total ? `${(cancela/total*100).toFixed(1).replace('.',',')}% do total` : '0%';
+        $('kpi-pendentes').innerText = pendentes;
+        if (pendentes === 0 && data.filter(d => d.status).length === 0) {
+            $('kpi-pendentes-sub').innerText = 'sem status preenchido';
+        } else {
+            const partes = [];
+            if (abertos)   partes.push(`${abertos} Aberto${abertos!==1?'s':''}`);
+            if (andamento) partes.push(`${andamento} Em Andamento`);
+            if (reabertos) partes.push(`${reabertos} Reaberto${reabertos!==1?'s':''}`);
+            $('kpi-pendentes-sub').innerText = partes.length ? partes.join(' · ') : 'tudo resolvido ✓';
+        }
 
         $('kpi-top-motivo').innerText = topMot[0];
         $('kpi-top-motivo-sub').innerText = `${topMot[1]} atendimento${topMot[1] !== 1 ? 's' : ''}`;
