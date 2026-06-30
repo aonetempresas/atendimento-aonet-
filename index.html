@@ -6,8 +6,10 @@
     <title>BI Atendimento — Aonet Corporativo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://docs.google.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
     <style>
         :root {
             --bg-deep: #0F172A;
@@ -478,6 +480,121 @@
         }
         .modal-table tr:hover td { background: rgba(96,165,250,0.04); }
 
+        /* Nome do cliente clicável no popup */
+        .client-link {
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(96,165,250,0.4);
+            transition: color 0.15s;
+        }
+        .client-link:hover {
+            color: var(--teal);
+            border-bottom-color: var(--teal);
+        }
+
+        /* Sub-modal de detalhes do atendimento (resolução completa, observação) */
+        .detail-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(6px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1100;
+            padding: 20px;
+        }
+        .detail-modal.active { display: flex; }
+        .detail-modal-content {
+            background: var(--bg-deep);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 28px 32px;
+            max-width: 720px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.7);
+        }
+        .detail-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .detail-modal-header h3 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0 0 4px 0;
+            line-height: 1.3;
+        }
+        .detail-modal-header .sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .detail-section {
+            margin-bottom: 18px;
+        }
+        .detail-section:last-child { margin-bottom: 0; }
+        .detail-section-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .detail-section-content {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-main);
+            background: rgba(15,23,42,0.5);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .detail-section-content.empty {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .detail-mini {
+            background: rgba(15,23,42,0.5);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+        .detail-mini-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        .detail-mini-value {
+            font-size: 13px;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
         /* ─── INSIGHTS 360 ─── */
         .insights-section {
             background: var(--card-bg);
@@ -819,6 +936,61 @@
     </div>
 </div>
 
+<!-- ─── SUB-MODAL — detalhes completos de um atendimento (clique no nome do cliente) ─── -->
+<div class="detail-modal" id="detail-modal" onclick="if(event.target===this) ui.closeDetailModal()">
+    <div class="detail-modal-content">
+        <div class="detail-modal-header">
+            <div>
+                <h3 id="detail-title">Cliente</h3>
+                <div class="sub" id="detail-sub"></div>
+            </div>
+            <button class="modal-close" onclick="ui.closeDetailModal()">✕</button>
+        </div>
+
+        <div class="detail-grid">
+            <div class="detail-mini">
+                <div class="detail-mini-label">Data</div>
+                <div class="detail-mini-value" id="detail-data">—</div>
+            </div>
+            <div class="detail-mini">
+                <div class="detail-mini-label">Protocolo</div>
+                <div class="detail-mini-value" id="detail-protocolo">—</div>
+            </div>
+            <div class="detail-mini">
+                <div class="detail-mini-label">Cidade</div>
+                <div class="detail-mini-value" id="detail-cidade">—</div>
+            </div>
+            <div class="detail-mini">
+                <div class="detail-mini-label">Plano</div>
+                <div class="detail-mini-value" id="detail-plano">—</div>
+            </div>
+            <div class="detail-mini">
+                <div class="detail-mini-label">Atendente</div>
+                <div class="detail-mini-value" id="detail-atendente">—</div>
+            </div>
+            <div class="detail-mini">
+                <div class="detail-mini-label">Tempo de Atendimento</div>
+                <div class="detail-mini-value" id="detail-tempo">—</div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-section-label">🎯 Motivo / Processo</div>
+            <div class="detail-section-content" id="detail-processo">—</div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-section-label">✍️ Resolução completa</div>
+            <div class="detail-section-content" id="detail-resolucao">—</div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-section-label">📝 Observação</div>
+            <div class="detail-section-content" id="detail-obs">—</div>
+        </div>
+    </div>
+</div>
+
 <script>
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCJxNaFnzfvWMtMABfxpHoo7bL4XtuHia5ZVNWIt3NsQjGtFsZUhAhKZBGeV_fbxSJrAh2A5OdroYZ/pub?output=csv";
 
@@ -925,8 +1097,35 @@ class AtendimentoEngine {
         }
     }
 
+    /* Quebra o CSV em linhas REAIS, respeitando aspas.
+       Sem isso, observações com quebras de linha são tratadas como atendimentos novos. */
+    splitCsvLines(csv) {
+        const linhas = [];
+        let cur = '';
+        let inQ = false;
+        for (let i = 0; i < csv.length; i++) {
+            const c = csv[i];
+            if (c === '"') {
+                // Aspas dupla escapada ("") = aspa literal — pula
+                if (csv[i+1] === '"') { cur += '""'; i++; continue; }
+                inQ = !inQ;
+                cur += c;
+                continue;
+            }
+            if ((c === '\n' || c === '\r') && !inQ) {
+                if (c === '\r' && csv[i+1] === '\n') i++;  // pula o \n do \r\n
+                if (cur.length > 0) linhas.push(cur);
+                cur = '';
+                continue;
+            }
+            cur += c;
+        }
+        if (cur.length > 0) linhas.push(cur);
+        return linhas;
+    }
+
     parse(csv) {
-        const lines = csv.split('\n');
+        const lines = this.splitCsvLines(csv);
         if (lines.length < 2) { this.data = []; return; }
 
         // Procura o cabeçalho — primeira linha que começa com "DATA" ou similar
@@ -1099,15 +1298,19 @@ const ui = {
     },
 
     applyFilter() {
-        engine.filters.dateStart = document.getElementById('filter-start').value;
-        engine.filters.dateEnd   = document.getElementById('filter-end').value;
-        engine.filters.cidade    = document.getElementById('filter-cidade').value;
-        engine.filters.processo  = document.getElementById('filter-processo').value;
-        engine.filters.plano     = document.getElementById('filter-plano').value;
-        engine.filters.operador  = document.getElementById('filter-operador').value;
-        engine.applyFilters();
-        this.updateFilterInfo();
-        this.renderAll();
+        // Debounce: se chamar várias vezes em sequência (ex: digitando data), só renderiza uma vez
+        if (this._filterTimer) clearTimeout(this._filterTimer);
+        this._filterTimer = setTimeout(() => {
+            engine.filters.dateStart = document.getElementById('filter-start').value;
+            engine.filters.dateEnd   = document.getElementById('filter-end').value;
+            engine.filters.cidade    = document.getElementById('filter-cidade').value;
+            engine.filters.processo  = document.getElementById('filter-processo').value;
+            engine.filters.plano     = document.getElementById('filter-plano').value;
+            engine.filters.operador  = document.getElementById('filter-operador').value;
+            engine.applyFilters();
+            this.updateFilterInfo();
+            this.renderAll();
+        }, 100);
     },
 
     /* Indica visualmente quais filtros estão ativos no topo do dashboard */
@@ -1145,11 +1348,16 @@ const ui = {
     },
 
     renderAll() {
+        // Performance: renderiza imediato o que é leve (números, KPIs, pulso)
         this.renderPulse();
         this.renderKPIs();
-        this.renderCharts();
-        this.renderTable();
         this.renderInsights();
+        this.renderTable();
+
+        // E renderiza gráficos no próximo "tick" do navegador — não bloqueia a UI
+        // (usuário já vê números/KPIs antes dos gráficos terminarem)
+        if (this._chartsTimer) clearTimeout(this._chartsTimer);
+        this._chartsTimer = setTimeout(() => this.renderCharts(), 16);
     },
 
     /* ── PULSO OPERACIONAL ── */
@@ -1387,7 +1595,7 @@ const ui = {
             chart: {
                 type:'area', height:280, toolbar:{show:false},
                 foreColor:'#94A3B8', background:'transparent',
-                animations:{enabled:true,speed:400},
+                animations:{enabled:false},
                 events: {
                     dataPointSelection: (e,c,cfg) => this.openModal('evolucao', dias[cfg.dataPointIndex], idsPorDia[dias[cfg.dataPointIndex]]),
                     markerClick:         (e,c,cfg) => this.openModal('evolucao', dias[cfg.dataPointIndex], idsPorDia[dias[cfg.dataPointIndex]]),
@@ -1406,7 +1614,7 @@ const ui = {
             fill:   { type:'gradient', gradient:{shadeIntensity:1, opacityFrom:0.3, opacityTo:0} },
             markers: { size:6, colors:['#60A5FA'], strokeColors:'#1E293B', strokeWidth:2, fillOpacity:1, shape:'circle',
                        hover:{size:10, sizeOffset:4} },
-            grid:   { borderColor:'rgba(148,163,184,0.1)' },
+            grid: { show: false },
             dataLabels: { enabled:false },
             tooltip: {
                 theme:'dark',
@@ -1496,7 +1704,7 @@ const ui = {
             plotOptions: { bar:{ columnWidth:'62%', borderRadius:6, distributed:true } },
             colors: ['#818CF8','#60A5FA','#2DD4BF','#34D399','#FBBF24','#F87171','#A78BFA','#FB7185','#FCD34D','#22D3EE','#4ADE80','#F472B6'],
             dataLabels: { enabled:true, style:{fontSize:'11px',colors:['#fff']}, offsetY:-18 },
-            grid: { borderColor:'rgba(148,163,184,0.1)' },
+            grid: { show: false },
             legend: { show:false },
             tooltip: {
                 theme:'dark',
@@ -1540,7 +1748,7 @@ const ui = {
             plotOptions: { bar:{ columnWidth:'62%', borderRadius:6, distributed:true } },
             colors: ['#60A5FA','#2DD4BF','#34D399','#818CF8','#FBBF24','#F87171','#A78BFA','#FB7185','#FCD34D','#22D3EE','#4ADE80','#F472B6'],
             dataLabels: { enabled:true, style:{fontSize:'11px',colors:['#fff']}, offsetY:-18 },
-            grid: { borderColor:'rgba(148,163,184,0.1)' },
+            grid: { show: false },
             legend: { show:false },
             tooltip: {
                 theme:'dark',
@@ -1564,7 +1772,7 @@ const ui = {
         this.chart('chart-horas', {
             chart: {
                 type:'area', height:300, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent',
-                animations:{enabled:true,speed:400},
+                animations:{enabled:false},
                 events: {
                     dataPointSelection: (e,c,cfg) => this.openModal('hora', `${String(cfg.dataPointIndex).padStart(2,'0')}h`, horasMap[cfg.dataPointIndex]),
                     markerClick:         (e,c,cfg) => this.openModal('hora', `${String(cfg.dataPointIndex).padStart(2,'0')}h`, horasMap[cfg.dataPointIndex]),
@@ -1583,7 +1791,7 @@ const ui = {
             fill:   { type:'gradient', gradient:{shadeIntensity:1, opacityFrom:0.35, opacityTo:0} },
             markers: { size:6, colors:['#2DD4BF'], strokeColors:'#1E293B', strokeWidth:2, fillOpacity:1, shape:'circle',
                        hover:{size:10, sizeOffset:4} },
-            grid: { borderColor:'rgba(148,163,184,0.1)' },
+            grid: { show: false },
             dataLabels: { enabled:false },
             tooltip: {
                 theme:'dark',
@@ -1671,7 +1879,7 @@ const ui = {
             plotOptions: { bar:{ columnWidth:'60%', borderRadius:6 } },
             colors: ['#FBBF24'],
             dataLabels: { enabled:false },
-            grid: { borderColor:'rgba(148,163,184,0.1)' },
+            grid: { show: false },
             tooltip: {
                 theme:'dark',
                 custom: ({dataPointIndex}) => {
@@ -1749,7 +1957,10 @@ const ui = {
         document.getElementById('modal-subtitle').innerText = `${lista.length} atendimento${lista.length !== 1 ? 's' : ''} encontrado${lista.length !== 1 ? 's' : ''}`;
 
         const sorted = lista.slice().sort((a,b) => (b.data||0) - (a.data||0));
-        document.getElementById('modal-tbody').innerHTML = sorted.map(d => {
+        // Guarda referência pra que openDetailModal possa acessar pelo índice
+        this._lastModalList = sorted;
+
+        document.getElementById('modal-tbody').innerHTML = sorted.map((d, i) => {
             const slaBadge = d.slaCumprido === 'Dentro do SLA'
                 ? '<span class="badge badge-success">Dentro</span>'
                 : d.slaCumprido === 'Fora do SLA'
@@ -1761,10 +1972,11 @@ const ui = {
                     ? '<span class="badge badge-danger">Negativo</span>'
                     : '<span class="badge badge-warning">—</span>';
             const resolText = (d.resolucao || '—').length > 80 ? (d.resolucao || '').substring(0,80) + '…' : (d.resolucao || '—');
+            const nomeEsc = (d.nome || '—').replace(/"/g, '&quot;');
             return `<tr>
                 <td>${d.dataStr || '—'}</td>
                 <td>${d.protocolo || '—'}</td>
-                <td>${d.nome || '—'}</td>
+                <td><span class="client-link" onclick="ui.openDetailModal(${i})" title="Ver detalhes completos">${nomeEsc}</span></td>
                 <td>${d.cidade || '—'}</td>
                 <td>${d.processo || '—'}</td>
                 <td title="${(d.resolucao || '').replace(/"/g, '&quot;')}" style="max-width:280px;font-size:11px;color:#94A3B8;">${resolText}</td>
@@ -1782,8 +1994,56 @@ const ui = {
         document.getElementById('modal').classList.remove('active');
     },
 
+    /* Sub-modal: ao clicar no nome do cliente dentro do modal,
+       mostra resolução completa + observação detalhada. */
+    openDetailModal(idx) {
+        const d = (this._lastModalList || [])[idx];
+        if (!d) return;
+
+        const $ = id => document.getElementById(id);
+        $('detail-title').innerText = d.nome || '—';
+        $('detail-sub').innerText   = d.cnpj ? `CNPJ: ${d.cnpj}` : '';
+
+        $('detail-data').innerText      = d.dataStr || '—';
+        $('detail-protocolo').innerText = d.protocolo || '—';
+        $('detail-cidade').innerText    = d.cidade || '—';
+        $('detail-plano').innerText     = d.plano || '—';
+        $('detail-atendente').innerText = d.operador || '—';
+        $('detail-tempo').innerText     = this.fmtTempo(d.tempoMinutos);
+
+        const fillSection = (id, txt) => {
+            const el = $(id);
+            if (!txt || !txt.trim()) {
+                el.classList.add('empty');
+                el.innerText = 'Sem conteúdo registrado';
+            } else {
+                el.classList.remove('empty');
+                el.innerText = txt;
+            }
+        };
+
+        fillSection('detail-processo',  d.processo);
+        fillSection('detail-resolucao', d.resolucao);
+        fillSection('detail-obs',       d.obs);
+
+        $('detail-modal').classList.add('active');
+    },
+
+    closeDetailModal() {
+        document.getElementById('detail-modal').classList.remove('active');
+    },
+
     chart(id, opts) {
-        if (this.charts[id]) { this.charts[id].destroy(); }
+        // Performance: se o gráfico já existe, só atualiza os dados (10x mais rápido que destroy+recreate)
+        if (this.charts[id]) {
+            try {
+                this.charts[id].updateOptions(opts, false, false, false);
+                return;
+            } catch (e) {
+                // Em caso de erro (ex: mudança de tipo de gráfico), fallback pro destroy+recreate
+                this.charts[id].destroy();
+            }
+        }
         this.charts[id] = new ApexCharts(document.getElementById(id), opts);
         this.charts[id].render();
     },
@@ -2023,9 +2283,17 @@ const ui = {
     }
 };
 
-/* ── Init ── */
-ui.syncAndRender();
-setInterval(() => ui.syncAndRender(), 5 * 60 * 1000);
+/* ── Init — aguarda DOM e ApexCharts carregarem ── */
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => ui.syncAndRender());
+} else {
+    ui.syncAndRender();
+}
+/* Auto-refresh inteligente — só roda quando a aba está visível.
+   Evita consumir CPU/banda quando o dashboard está em segundo plano. */
+setInterval(() => {
+    if (document.visibilityState === 'visible') ui.syncAndRender();
+}, 5 * 60 * 1000);
 
 /* ── Fullscreen — atualiza texto do botão ── */
 function updateFullscreenButton() {
