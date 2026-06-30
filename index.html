@@ -856,10 +856,10 @@
             <div id="chart-horas"></div>
         </div>
 
-        <!-- Linha 4: Satisfação (PÓS) + Distribuição por Atendente + Tempo por Plano -->
+        <!-- Linha 4: Retorno do Cliente (PÓS) + Distribuição por Atendente + Tempo por Plano -->
         <div class="chart-card span4">
             <div class="chart-title">
-                Satisfação (PÓS) — Distribuição
+                Retorno do Cliente (PÓS)
                 <span class="chart-tag">DONUT</span>
             </div>
             <div id="chart-pos"></div>
@@ -1205,7 +1205,7 @@ class AtendimentoEngine {
                 processo:   this.normalizeProcesso(v[idx.processo]),
                 resolucao:  v[idx.resolucao],
                 status:     (v[idx.status]||'').trim(),              // Aberto / Em Andamento / Resolvido / Cancelado / Reaberto
-                pos:        (v[idx.pos]||'').toUpperCase().trim(),  // VERDADEIRO / FALSO
+                pos:        (v[idx.pos]||'').toUpperCase().trim(),  // COM RETORNO / SEM RETORNO
                 slaCumprido: (v[idx.slaCumprido]||'').trim(),       // "Dentro do SLA" / "Fora do SLA"
                 obs:        v[idx.obs] || '',
                 tempoMinutos: tempoMinutos
@@ -1380,8 +1380,8 @@ const ui = {
         const pctSla   = slaAval ? (slaOk / slaAval) * 100 : 0;
 
         // Conta só atendimentos com PÓS avaliado (Verdadeiro/Falso) — ignora vazios
-        const posOk    = data.filter(d => d.pos === 'VERDADEIRO').length;
-        const posNeg   = data.filter(d => d.pos === 'FALSO').length;
+        const posOk    = data.filter(d => d.pos === 'COM RETORNO').length;
+        const posNeg   = data.filter(d => d.pos === 'SEM RETORNO').length;
         const posAval  = posOk + posNeg;
         const pctPos   = posAval ? (posOk / posAval) * 100 : 0;
 
@@ -1416,13 +1416,13 @@ const ui = {
             comparacao.sla = { atual: pctA, anterior: pctB };
 
             // PÓS
-            const pOkA = fAtual.filter(d => d.pos === 'VERDADEIRO').length;
-            const pNeA = fAtual.filter(d => d.pos === 'FALSO').length;
+            const pOkA = fAtual.filter(d => d.pos === 'COM RETORNO').length;
+            const pNeA = fAtual.filter(d => d.pos === 'SEM RETORNO').length;
             const pAA = pOkA + pNeA;
             const pAtA = pAA ? (pOkA/pAA*100) : null;
 
-            const pOkB = fAnt.filter(d => d.pos === 'VERDADEIRO').length;
-            const pNeB = fAnt.filter(d => d.pos === 'FALSO').length;
+            const pOkB = fAnt.filter(d => d.pos === 'COM RETORNO').length;
+            const pNeB = fAnt.filter(d => d.pos === 'SEM RETORNO').length;
             const pAB = pOkB + pNeB;
             const pAtB = pAB ? (pOkB/pAB*100) : null;
 
@@ -1486,13 +1486,13 @@ const ui = {
                 valueColor: slaAval ? sSla.cor : '#94A3B8'
             },
             {
-                emoji:'😊', label:'Satisfação (PÓS)',
+                emoji:'🔁', label:'Retorno do Cliente (PÓS)',
                 value: posAval ? pctPos.toFixed(1).replace('.',',') + '%' : '—',
                 status: posAval ? sPos.label : '',
                 statusColor: sPos.cor,
                 sub: comparacao.pos && comparacao.pos.atual != null && comparacao.pos.anterior != null
                     ? compTxt(comparacao.pos.atual, comparacao.pos.anterior, 'alto', diff => diff.toFixed(1).replace('.',',') + 'pp')
-                    : (posAval ? `${posOk} positivas de ${posAval}` : 'sem avaliação'),
+                    : (posAval ? `${posOk} com retorno de ${posAval}` : 'sem avaliação'),
                 cor: posAval ? sPos.cor : '#94A3B8',
                 valueColor: posAval ? sPos.cor : '#94A3B8'
             },
@@ -1830,8 +1830,8 @@ const ui = {
         });
 
         // ════════════ 6. PÓS DONUT (melhorado, igual SLA) ════════════
-        const posOkArr  = data.filter(d => d.pos === 'VERDADEIRO');
-        const posNegArr = data.filter(d => d.pos === 'FALSO');
+        const posOkArr  = data.filter(d => d.pos === 'COM RETORNO');
+        const posNegArr = data.filter(d => d.pos === 'SEM RETORNO');
         const posOk = posOkArr.length, posNeg = posNegArr.length;
         const posTotal = posOk + posNeg;
         const posPct = posTotal ? (posOk/posTotal*100).toFixed(1).replace('.',',') : '0';
@@ -1841,13 +1841,13 @@ const ui = {
                 events: {
                     dataPointSelection: (e,c,cfg) => {
                         const arr = cfg.dataPointIndex === 0 ? posOkArr : posNegArr;
-                        const label = cfg.dataPointIndex === 0 ? 'Positivo' : 'Negativo';
+                        const label = cfg.dataPointIndex === 0 ? 'Com retorno' : 'Sem retorno';
                         this.openModal('pos', label, arr);
                     }
                 }
             },
             series: [posOk, posNeg],
-            labels: ['Positivo', 'Negativo'],
+            labels: ['Com retorno', 'Sem retorno'],
             colors: ['#34D399', '#F87171'],
             legend: { position:'bottom', fontSize:'12px', fontWeight:600, labels:{colors:'#94A3B8'}, markers:{width:10,height:10,radius:3} },
             dataLabels: { enabled:true, style:{fontSize:'14px',fontWeight:700,colors:['#fff']},
@@ -1862,7 +1862,7 @@ const ui = {
                             name: { show:true, fontSize:'13px', color:'#94A3B8', fontWeight:600 },
                             value: { show:true, fontSize:'24px', color:'#fff', fontWeight:700, offsetY:8 },
                             total: {
-                                show:true, label:'Satisfação', color:'#94A3B8',
+                                show:true, label:'Com retorno', color:'#94A3B8',
                                 fontSize:'12px', fontWeight:600,
                                 formatter: () => posPct + '%'
                             }
@@ -1972,7 +1972,7 @@ const ui = {
             motivo:    `Motivo: ${label}`,
             cidade:    `Cidade: ${label}`,
             hora:      `Aberturas às ${label}`,
-            pos:       `Satisfação ${label}`,
+            pos:       `PÓS: ${label}`,
             plano:     `Plano: ${label}`,
             atendente: `Atendente: ${label}`
         };
@@ -1989,10 +1989,10 @@ const ui = {
                 : d.slaCumprido === 'Fora do SLA'
                     ? '<span class="badge badge-danger">Fora</span>'
                     : '<span class="badge badge-warning">—</span>';
-            const posBadge = d.pos === 'VERDADEIRO'
-                ? '<span class="badge badge-success">Positivo</span>'
-                : d.pos === 'FALSO'
-                    ? '<span class="badge badge-danger">Negativo</span>'
+            const posBadge = d.pos === 'COM RETORNO'
+                ? '<span class="badge badge-success">Com retorno</span>'
+                : d.pos === 'SEM RETORNO'
+                    ? '<span class="badge badge-danger">Sem retorno</span>'
                     : '<span class="badge badge-warning">—</span>';
             const resolText = (d.resolucao || '—').length > 80 ? (d.resolucao || '').substring(0,80) + '…' : (d.resolucao || '—');
             const nomeEsc = (d.nome || '—').replace(/"/g, '&quot;');
@@ -2167,26 +2167,26 @@ const ui = {
         }
 
         // 5. SATISFAÇÃO (PÓS)
-        const posOk = data.filter(d => d.pos === 'VERDADEIRO').length;
-        const posNeg = data.filter(d => d.pos === 'FALSO').length;
+        const posOk = data.filter(d => d.pos === 'COM RETORNO').length;
+        const posNeg = data.filter(d => d.pos === 'SEM RETORNO').length;
         const posAval = posOk + posNeg;
         if (posAval > 0) {
             const pctPos = (posOk / posAval * 100);
             if (posNeg >= 5) {
                 insights.push({
                     cor: '#F87171',
-                    icon: '😟',
-                    titulo: 'Avaliações negativas em volume',
-                    texto: `<strong>${posNeg}</strong> avaliações negativas (PÓS Falso) — <strong>${(posNeg/posAval*100).toFixed(0)}%</strong> dos avaliados.`,
-                    acao: '💡 Revisar cada caso negativo. Pode revelar padrão (mesmo motivo, mesmo atendente, mesmo horário) com causa-raiz.'
+                    icon: '🤔',
+                    titulo: 'Clientes sem retorno em volume',
+                    texto: `<strong>${posNeg}</strong> clientes <strong>sem retorno</strong> — <strong>${(posNeg/posAval*100).toFixed(0)}%</strong> do total avaliado.`,
+                    acao: '💡 Considerar fluxo de follow-up: cliente sem retorno pode indicar problema mal resolvido ou que ele desistiu de cobrar.'
                 });
             } else if (pctPos >= 90) {
                 insights.push({
                     cor: '#34D399',
-                    icon: '😊',
-                    titulo: 'Satisfação elevada',
-                    texto: `<strong>${pctPos.toFixed(1).replace('.',',')}%</strong> dos clientes avaliados ficaram satisfeitos.`,
-                    acao: '💡 Continuar reforço positivo no time. Coletar depoimentos pode virar material de marketing.'
+                    icon: '🔁',
+                    titulo: 'Retorno do cliente elevado',
+                    texto: `<strong>${pctPos.toFixed(1).replace('.',',')}%</strong> dos clientes retornaram para confirmar resolução.`,
+                    acao: '💡 Cliente que retorna está engajado. Boa oportunidade pra coletar depoimentos e pesquisa de NPS.'
                 });
             }
         }
@@ -2269,10 +2269,10 @@ const ui = {
                 : d.slaCumprido === 'Fora do SLA'
                     ? '<span class="badge badge-danger">Fora</span>'
                     : '<span class="badge badge-warning">—</span>';
-            const posBadge = d.pos === 'VERDADEIRO'
-                ? '<span class="badge badge-success">Positivo</span>'
-                : d.pos === 'FALSO'
-                    ? '<span class="badge badge-danger">Negativo</span>'
+            const posBadge = d.pos === 'COM RETORNO'
+                ? '<span class="badge badge-success">Com retorno</span>'
+                : d.pos === 'SEM RETORNO'
+                    ? '<span class="badge badge-danger">Sem retorno</span>'
                     : '<span class="badge badge-warning">—</span>';
             return `
                 <tr>
