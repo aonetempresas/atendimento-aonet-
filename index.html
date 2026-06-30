@@ -132,7 +132,7 @@
         /* ─── PULSO OPERACIONAL ─── */
         .main-pulse-row {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(6, minmax(0, 1fr));
             gap: 10px;
             margin-bottom: 10px;
         }
@@ -694,6 +694,7 @@
 
         @media (max-width: 1400px) {
             .kpi-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+            .main-pulse-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
         @media (max-width: 1100px) {
             .kpi-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -1465,14 +1466,51 @@ const ui = {
         const sPos   = status(pctPos,  BENCHMARKS.pos);
         const sTempo = status(mediana, BENCHMARKS.tempo, 'baixo');
 
+        // ── Cálculo dos cards de tempo (Dias Úteis e % Mês Transcorrido) ──
+        // Usa o mês mais recente dos dados como referência (ou mês atual se não houver dados)
+        const hojeRef = mesAtual
+            ? new Date(+mesAtual.split('-')[0], +mesAtual.split('-')[1]-1, 1)  // primeiro dia do mês de referência
+            : new Date();
+        // Se for o mês atual, usa hoje. Senão, usa o último dia do mês de referência.
+        const agora = new Date();
+        const mesmoMes = hojeRef.getFullYear() === agora.getFullYear() && hojeRef.getMonth() === agora.getMonth();
+        const dataReferencia = mesmoMes ? agora : new Date(hojeRef.getFullYear(), hojeRef.getMonth()+1, 0);
+
+        const inicioMes = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth(), 1);
+        const fimMes    = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth()+1, 0);
+
+        const diasUteisTrabalhados = holidaysEngine.countBusinessDays(inicioMes, dataReferencia);
+        const diasUteisMes         = holidaysEngine.countBusinessDays(inicioMes, fimMes);
+        const diasRestantes        = Math.max(0, diasUteisMes - diasUteisTrabalhados);
+        const pctTranscorrido      = diasUteisMes > 0 ? (diasUteisTrabalhados / diasUteisMes) * 100 : 0;
+
+        const nomesMeses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+        const mesNomeShort = `${nomesMeses[dataReferencia.getMonth()]}/${dataReferencia.getFullYear()}`.toLowerCase();
+
         const cards = [
             {
-                emoji:'📅', label:'Atendimentos no Mês',
+                emoji:'📅', label:'Dias Úteis',
+                value: `${diasUteisTrabalhados} de ${diasUteisMes}`,
+                status: '',
+                statusColor: '',
+                sub: diasRestantes === 0 ? 'último dia útil' : `${diasRestantes} dia${diasRestantes!==1?'s':''} restante${diasRestantes!==1?'s':''}`,
+                cor: '#60A5FA'
+            },
+            {
+                emoji:'🕐', label:'% Mês Transcorrido',
+                value: `${pctTranscorrido.toFixed(1).replace('.',',')}%`,
+                status: '',
+                statusColor: '',
+                sub: `${mesNomeShort} (mês útil)`,
+                cor: '#818CF8'
+            },
+            {
+                emoji:'🎧', label:'Atendimentos no Mês',
                 value: total,
                 status: '',
                 statusColor: '',
                 sub: comparacao.total ? compTxt(comparacao.total.atual, comparacao.total.anterior, 'baixo') : `${total} chamado${total!==1?'s':''}`,
-                cor: '#60A5FA'
+                cor: '#2DD4BF'
             },
             {
                 emoji:'🚦', label:'SLA Atingido',
