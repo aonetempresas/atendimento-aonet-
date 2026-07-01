@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BI Atendimento — Aonet Corporativo</title>
+    <title>BI Aonet Corporativo — Atendimento & Suporte</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
@@ -35,6 +35,11 @@
             background-image: radial-gradient(circle at 20% 50%, rgba(96,165,250,0.08) 0%, transparent 50%),
                               radial-gradient(circle at 80% 80%, rgba(45,212,191,0.05) 0%, transparent 50%);
         }
+        /* Cor de fundo da view Suporte fica ligeiramente diferente pra sinalizar contexto */
+        body.view-suporte-active {
+            background-image: radial-gradient(circle at 20% 50%, rgba(248,113,113,0.08) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 80%, rgba(251,191,36,0.05) 0%, transparent 50%);
+        }
 
         /* ─── HEADER ─── */
         .header {
@@ -48,8 +53,9 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            gap: 16px;
         }
-        .header-brand { display: flex; align-items: center; gap: 14px; }
+        .header-brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
         .header-logo {
             height: 130px;
             width: auto;
@@ -65,7 +71,6 @@
             letter-spacing: -0.4px;
             color: var(--text-main);
         }
-        /* Badge do mês visualizado — aparece ao lado do título "BI Atendimento" */
         .month-indicator {
             display: inline-flex;
             align-items: center;
@@ -79,6 +84,11 @@
             font-weight: 600;
             letter-spacing: 0.2px;
             white-space: nowrap;
+        }
+        body.view-suporte-active .month-indicator {
+            background: rgba(248, 113, 113, 0.10);
+            border-color: rgba(248, 113, 113, 0.28);
+            color: #FCA5A5;
         }
         .header-sub {
             font-size: 11px;
@@ -100,8 +110,46 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+
+        /* ─── TAB NAV (Atendimento / Suporte) ─── */
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 4px;
+            flex-shrink: 0;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.18s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tab-btn:hover { color: var(--text-main); background: rgba(148, 163, 184, 0.08); }
+        .tab-btn[data-view="atendimento"].active {
+            background: rgba(96, 165, 250, 0.18);
+            color: var(--primary);
+            box-shadow: 0 0 12px rgba(96, 165, 250, 0.2);
+        }
+        .tab-btn[data-view="suporte"].active {
+            background: rgba(248, 113, 113, 0.18);
+            color: var(--danger);
+            box-shadow: 0 0 12px rgba(248, 113, 113, 0.2);
+        }
+
         .header-right { display: flex; gap: 10px; align-items: center; }
-        .btn-sync, .btn-vendas-toggle, .btn-fullscreen {
+        .btn-sync, .btn-fullscreen {
             border-radius: 10px;
             padding: 9px 20px;
             font-size: 12px;
@@ -119,17 +167,6 @@
             background: rgba(96,165,250,0.2);
             transform: translateY(-1px);
         }
-        .btn-vendas-toggle {
-            background: rgba(45,212,191,0.1);
-            color: var(--teal);
-            border: 1px solid rgba(45,212,191,0.3);
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-vendas-toggle:hover {
-            background: rgba(45,212,191,0.2);
-            transform: translateY(-1px);
-        }
         .btn-fullscreen {
             background: rgba(148,163,184,0.1);
             color: var(--text-muted);
@@ -140,6 +177,10 @@
             color: var(--text-main);
             transform: translateY(-1px);
         }
+
+        /* ─── VIEW SWITCHER ─── */
+        .view { display: none; }
+        .view.active { display: block; }
 
         /* ─── MAIN ─── */
         .main { padding: 24px; max-width: 1920px; margin: 0 auto; }
@@ -295,8 +336,8 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            flex: 1 1 0;            /* distribui o espaço disponível por igual */
-            min-width: 0;           /* permite encolher abaixo do conteúdo */
+            flex: 1 1 0;
+            min-width: 0;
         }
         .filter-item label {
             font-size: 9.5px;
@@ -320,9 +361,7 @@
             min-width: 0;
             text-overflow: ellipsis;
         }
-        .filter-item input[type="date"] {
-            min-width: 110px;
-        }
+        .filter-item input[type="date"] { min-width: 110px; }
         .filter-clear {
             background: none;
             border: none;
@@ -337,7 +376,6 @@
         }
         .filter-clear:hover { color: #FCA5A5; }
 
-        /* Botões de navegação de mês (◀ Anterior · Próximo ▶) */
         .btn-month-nav {
             background: rgba(96, 165, 250, 0.08);
             border: 1px solid rgba(96, 165, 250, 0.25);
@@ -356,6 +394,15 @@
             background: rgba(96, 165, 250, 0.18);
             border-color: rgba(96, 165, 250, 0.5);
         }
+        body.view-suporte-active .btn-month-nav {
+            background: rgba(248, 113, 113, 0.08);
+            border-color: rgba(248, 113, 113, 0.25);
+            color: #FCA5A5;
+        }
+        body.view-suporte-active .btn-month-nav:hover {
+            background: rgba(248, 113, 113, 0.18);
+            border-color: rgba(248, 113, 113, 0.5);
+        }
 
         /* ─── CHARTS ─── */
         .chart-grid {
@@ -370,7 +417,9 @@
             border-radius: 16px;
             padding: 18px 20px;
             backdrop-filter: blur(10px);
+            transition: border-color 0.2s;
         }
+        .chart-card:hover { border-color: rgba(96,165,250,0.25); }
         .chart-card.span4 { grid-column: span 4; }
         .chart-card.span6 { grid-column: span 6; }
         .chart-card.span8 { grid-column: span 8; }
@@ -394,38 +443,7 @@
             text-transform: uppercase;
         }
 
-        /* ─── TABLE ─── */
-        .table-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 18px 20px;
-            backdrop-filter: blur(10px);
-            margin-bottom: 24px;
-        }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-        }
-        .data-table th {
-            text-align: left;
-            padding: 10px 8px;
-            border-bottom: 1px solid var(--card-border);
-            color: var(--text-muted);
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .data-table td {
-            padding: 10px 8px;
-            border-bottom: 1px solid rgba(148,163,184,0.06);
-            color: var(--text-main);
-        }
-        .data-table tr:hover td {
-            background: rgba(96,165,250,0.04);
-        }
+        /* ─── TABLE (nos modais) ─── */
         .badge {
             display: inline-block;
             padding: 3px 9px;
@@ -439,7 +457,7 @@
         .badge-danger  { background: rgba(248,113,113,0.15); color: var(--danger); }
         .badge-warning { background: rgba(251,191,36,0.15); color: var(--warning); }
 
-        /* ─── SCROLL HORIZONTAL pra gráficos com muitos items (Top Motivos / Cidades) ─── */
+        /* ─── SCROLL HORIZONTAL pra gráficos com muitos items ─── */
         .chart-scroll-container {
             overflow-x: auto;
             overflow-y: hidden;
@@ -451,7 +469,7 @@
         .chart-scroll-container::-webkit-scrollbar-thumb:hover { background: rgba(96,165,250,0.6); }
         .chart-inner { min-width: 100%; }
 
-        /* ─── MODAL — popup ao clicar nos gráficos ─── */
+        /* ─── MODAL ─── */
         .modal {
             position: fixed;
             inset: 0;
@@ -506,11 +524,7 @@
             transition: color 0.2s;
         }
         .modal-close:hover { color: var(--danger); }
-        .modal-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-        }
+        .modal-table { width: 100%; border-collapse: collapse; font-size: 12px; }
         .modal-table th {
             text-align: left;
             padding: 9px 8px;
@@ -531,7 +545,6 @@
         }
         .modal-table tr:hover td { background: rgba(96,165,250,0.04); }
 
-        /* Nome do cliente clicável no popup */
         .client-link {
             color: var(--primary);
             cursor: pointer;
@@ -540,12 +553,9 @@
             border-bottom: 1px dashed rgba(96,165,250,0.4);
             transition: color 0.15s;
         }
-        .client-link:hover {
-            color: var(--teal);
-            border-bottom-color: var(--teal);
-        }
+        .client-link:hover { color: var(--teal); border-bottom-color: var(--teal); }
 
-        /* Sub-modal de detalhes do atendimento (resolução completa, observação) */
+        /* ─── SUB-MODAL (detalhes) ─── */
         .detail-modal {
             position: fixed;
             inset: 0;
@@ -590,9 +600,7 @@
             color: var(--text-muted);
             font-weight: 500;
         }
-        .detail-section {
-            margin-bottom: 18px;
-        }
+        .detail-section { margin-bottom: 18px; }
         .detail-section:last-child { margin-bottom: 0; }
         .detail-section-label {
             font-size: 10px;
@@ -709,15 +717,8 @@
             .insights-grid { grid-template-columns: 1fr; }
         }
 
-        /* ─── Hover sutil em gráficos ─── */
-        .chart-card {
-            transition: border-color 0.2s;
-        }
-        .chart-card:hover {
-            border-color: rgba(96,165,250,0.25);
-        }
-
         /* ─── LOADER ─── */
+        .loader {
             position: fixed;
             inset: 0;
             background: var(--bg-deep);
@@ -744,12 +745,14 @@
             .kpi-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .main-pulse-row { grid-template-columns: repeat(2, 1fr); }
             .chart-card.span4, .chart-card.span6, .chart-card.span8 { grid-column: span 12; }
+            .header { flex-wrap: wrap; }
         }
         @media (max-width: 768px) {
             .main { padding: 16px; }
             .kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .main-pulse-row { grid-template-columns: 1fr; }
             .main-pulse-legend { justify-content: flex-start; flex-wrap: wrap; gap: 12px; }
+            .tab-btn { padding: 8px 12px; font-size: 11px; }
         }
     </style>
 </head>
@@ -764,7 +767,7 @@
         <img class="header-logo" src="Empresas.png" alt="Aonet Empresas" />
         <div>
             <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-                <h1>BI Atendimento</h1>
+                <h1 id="header-title">BI Atendimento</h1>
                 <span id="month-indicator" class="month-indicator" style="display:none;">
                     <span>📅</span>
                     <span id="month-indicator-text">—</span>
@@ -776,182 +779,31 @@
             </div>
         </div>
     </div>
+
+    <div class="tab-nav" role="tablist">
+        <button class="tab-btn active" data-view="atendimento" onclick="activateView('atendimento')" role="tab">📋 Atendimento</button>
+        <button class="tab-btn" data-view="suporte" onclick="activateView('suporte')" role="tab">🚨 Suporte</button>
+    </div>
+
     <div class="header-right">
-        <button class="btn-fullscreen" onclick="ui.toggleFullscreen()" title="Tela cheia (F11)">⛶ &nbsp;Tela Cheia</button>
-        <button class="btn-sync" onclick="ui.syncAndRender()">⟳ &nbsp;Sincronizar</button>
+        <button class="btn-fullscreen" onclick="toggleFullscreen()" title="Tela cheia (F11)">⛶ &nbsp;Tela Cheia</button>
+        <button class="btn-sync" onclick="syncActive()">⟳ &nbsp;Sincronizar</button>
     </div>
 </header>
 
-<div class="main">
+<!-- Containers das duas views. HTML interno gerado por JS pra manter uma única fonte da verdade. -->
+<div id="view-atendimento" class="view active"></div>
+<div id="view-suporte" class="view"></div>
 
-    <!-- ─── PULSO OPERACIONAL ─── -->
-    <div class="main-pulse-row" id="main-pulse"></div>
-    <div class="main-pulse-legend">
-        <span><span class="legend-dot" style="background:#34D399"></span> Excelente</span>
-        <span><span class="legend-dot" style="background:#FBBF24"></span> Bom</span>
-        <span><span class="legend-dot" style="background:#F87171"></span> Atenção</span>
-    </div>
-
-    <!-- ─── ESTEIRA DE KPIs ─── -->
-    <section class="kpi-strip">
-        <div class="kpi-card" style="--kpi-accent:var(--purple)">
-            <p class="kpi-label">Top Motivo</p>
-            <p class="kpi-value" id="kpi-top-motivo" style="color:var(--purple);font-size:13px;">—</p>
-            <p class="kpi-sub" id="kpi-top-motivo-sub">0 atendimentos</p>
-        </div>
-        <div class="kpi-card" style="--kpi-accent:var(--primary)">
-            <p class="kpi-label">Top Cidade</p>
-            <p class="kpi-value" id="kpi-top-cidade" style="color:var(--primary);font-size:13px;">—</p>
-            <p class="kpi-sub" id="kpi-top-cidade-sub">0 atendimentos</p>
-        </div>
-        <div class="kpi-card" style="--kpi-accent:var(--teal)">
-            <p class="kpi-label">Top Plano</p>
-            <p class="kpi-value" id="kpi-top-plano" style="color:var(--teal);font-size:13px;">—</p>
-            <p class="kpi-sub" id="kpi-top-plano-sub">0 atendimentos</p>
-        </div>
-        <div class="kpi-card" style="--kpi-accent:var(--warning)">
-            <p class="kpi-label">Pico de Horário</p>
-            <p class="kpi-value" id="kpi-pico" style="color:var(--warning)">—</p>
-            <p class="kpi-sub" id="kpi-pico-sub">aberturas concentradas</p>
-        </div>
-        <div class="kpi-card" style="--kpi-accent:var(--danger)">
-            <p class="kpi-label">Estouro Médio do SLA</p>
-            <p class="kpi-value" id="kpi-estouro" style="color:var(--danger)">—</p>
-            <p class="kpi-sub" id="kpi-estouro-sub">nos casos "Fora do SLA"</p>
-        </div>
-        <div class="kpi-card" style="--kpi-accent:var(--warning)">
-            <p class="kpi-label">Chamados Pendentes</p>
-            <p class="kpi-value" id="kpi-pendentes" style="color:var(--warning)">0</p>
-            <p class="kpi-sub" id="kpi-pendentes-sub">Aberto / Em Andamento / Reaberto</p>
-        </div>
-    </section>
-
-    <!-- ─── FILTROS ─── -->
-    <div id="filter-info-bar" style="display:none;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#FBBF24;font-weight:500;">
-        📅 <strong>Filtros ativos</strong> <span id="filter-info-text"></span>
-    </div>
-
-    <!-- ─── FILTROS ─── -->
-    <div class="filter-bar">
-        <div class="filter-item">
-            <label>Início</label>
-            <input type="date" id="filter-start" onchange="ui.applyFilter()" />
-        </div>
-        <div class="filter-item">
-            <label>Fim</label>
-            <input type="date" id="filter-end" onchange="ui.applyFilter()" />
-        </div>
-        <div class="filter-item">
-            <label>Cidade</label>
-            <select id="filter-cidade" onchange="ui.applyFilter()"></select>
-        </div>
-        <div class="filter-item">
-            <label>Processo</label>
-            <select id="filter-processo" onchange="ui.applyFilter()"></select>
-        </div>
-        <div class="filter-item">
-            <label>Plano</label>
-            <select id="filter-plano" onchange="ui.applyFilter()"></select>
-        </div>
-        <div class="filter-item">
-            <label>Atendente</label>
-            <select id="filter-operador" onchange="ui.applyFilter()"></select>
-        </div>
-        <div class="filter-item">
-            <label>Status</label>
-            <select id="filter-status" onchange="ui.applyFilter()"></select>
-        </div>
-        <button class="btn-month-nav" onclick="ui.navigateMonth(-1)" title="Mês anterior">◀ Mês Anterior</button>
-        <button class="btn-month-nav" onclick="ui.navigateMonth(1)" title="Próximo mês">Próximo Mês ▶</button>
-        <button class="filter-clear" onclick="ui.clearFilters()">✕ Limpar Filtros</button>
-    </div>
-
-    <!-- ─── GRÁFICOS ─── -->
-    <div class="chart-grid">
-        <!-- Linha 1: Evolução + SLA Donut -->
-        <div class="chart-card span8">
-            <div class="chart-title">
-                Evolução Diária de Atendimentos
-                <span class="chart-tag">LINE</span>
-            </div>
-            <div id="chart-evolucao"></div>
-        </div>
-        <div class="chart-card span4">
-            <div class="chart-title">
-                SLA Cumprido vs Não Cumprido
-                <span class="chart-tag">DONUT</span>
-            </div>
-            <div id="chart-sla"></div>
-        </div>
-
-        <!-- Linha 2: Top Motivos + Top Cidades (lado a lado com scroll horizontal) -->
-        <div class="chart-card span6">
-            <div class="chart-title">
-                Top Motivos de Atendimento
-                <span class="chart-tag">BAR · SCROLL</span>
-            </div>
-            <div class="chart-scroll-container"><div id="chart-motivos" class="chart-inner"></div></div>
-        </div>
-        <div class="chart-card span6">
-            <div class="chart-title">
-                Top Cidades
-                <span class="chart-tag">BAR · SCROLL</span>
-            </div>
-            <div class="chart-scroll-container"><div id="chart-cidades" class="chart-inner"></div></div>
-        </div>
-
-        <!-- Linha 3: Distribuição por Hora (largura total + formato área igual evolução) -->
-        <div class="chart-card span12">
-            <div class="chart-title">
-                Distribuição por Hora do Dia
-                <span class="chart-tag">AREA</span>
-            </div>
-            <div id="chart-horas"></div>
-        </div>
-
-        <!-- Linha 4: Retorno do Cliente (PÓS) + Distribuição por Atendente + Tempo por Plano -->
-        <div class="chart-card span4">
-            <div class="chart-title">
-                Retorno do Cliente (PÓS)
-                <span class="chart-tag">DONUT</span>
-            </div>
-            <div id="chart-pos"></div>
-        </div>
-        <div class="chart-card span4">
-            <div class="chart-title">
-                Distribuição por Atendente
-                <span class="chart-tag">DONUT</span>
-            </div>
-            <div id="chart-atendente"></div>
-        </div>
-        <div class="chart-card span4">
-            <div class="chart-title">
-                Tempo Médio por Plano
-                <span class="chart-tag">BAR</span>
-            </div>
-            <div id="chart-tempo-plano"></div>
-        </div>
-    </div>
-
-    <!-- ─── TABELA ─── -->
-    <!-- ─── INSIGHTS 360 ─── -->
-    <div class="insights-section">
-        <div class="insights-title">💡 Insights 360 — Análise para Otimização</div>
-        <div class="insights-subtitle">Análises automáticas baseadas nos dados atuais — atualizadas a cada sincronização</div>
-        <div class="insights-grid" id="insights-grid"></div>
-    </div>
-
-</div>
-
-<!-- ─── MODAL — popup com lista de atendimentos ao clicar nos gráficos ─── -->
-<div class="modal" id="modal" onclick="if(event.target===this) ui.closeModal()">
+<!-- Modais compartilhados (só uma view fica ativa por vez, então podem ser reutilizados) -->
+<div class="modal" id="modal" onclick="if(event.target===this) closeSharedModal()">
     <div class="modal-content">
         <div class="modal-header">
             <div>
                 <h2 id="modal-title">Detalhes</h2>
                 <p id="modal-subtitle"></p>
             </div>
-            <button class="modal-close" onclick="ui.closeModal()">✕</button>
+            <button class="modal-close" onclick="closeSharedModal()">✕</button>
         </div>
         <div style="overflow-x:auto;">
             <table class="modal-table" id="modal-table">
@@ -975,54 +827,33 @@
     </div>
 </div>
 
-<!-- ─── SUB-MODAL — detalhes completos de um atendimento (clique no nome do cliente) ─── -->
-<div class="detail-modal" id="detail-modal" onclick="if(event.target===this) ui.closeDetailModal()">
+<div class="detail-modal" id="detail-modal" onclick="if(event.target===this) closeSharedDetailModal()">
     <div class="detail-modal-content">
         <div class="detail-modal-header">
             <div>
                 <h3 id="detail-title">Cliente</h3>
                 <div class="sub" id="detail-sub"></div>
             </div>
-            <button class="modal-close" onclick="ui.closeDetailModal()">✕</button>
+            <button class="modal-close" onclick="closeSharedDetailModal()">✕</button>
         </div>
 
         <div class="detail-grid">
-            <div class="detail-mini">
-                <div class="detail-mini-label">Data</div>
-                <div class="detail-mini-value" id="detail-data">—</div>
-            </div>
-            <div class="detail-mini">
-                <div class="detail-mini-label">Protocolo</div>
-                <div class="detail-mini-value" id="detail-protocolo">—</div>
-            </div>
-            <div class="detail-mini">
-                <div class="detail-mini-label">Cidade</div>
-                <div class="detail-mini-value" id="detail-cidade">—</div>
-            </div>
-            <div class="detail-mini">
-                <div class="detail-mini-label">Plano</div>
-                <div class="detail-mini-value" id="detail-plano">—</div>
-            </div>
-            <div class="detail-mini">
-                <div class="detail-mini-label">Atendente</div>
-                <div class="detail-mini-value" id="detail-atendente">—</div>
-            </div>
-            <div class="detail-mini">
-                <div class="detail-mini-label">Tempo de Atendimento</div>
-                <div class="detail-mini-value" id="detail-tempo">—</div>
-            </div>
+            <div class="detail-mini"><div class="detail-mini-label">Data</div><div class="detail-mini-value" id="detail-data">—</div></div>
+            <div class="detail-mini"><div class="detail-mini-label">Protocolo</div><div class="detail-mini-value" id="detail-protocolo">—</div></div>
+            <div class="detail-mini"><div class="detail-mini-label">Cidade</div><div class="detail-mini-value" id="detail-cidade">—</div></div>
+            <div class="detail-mini"><div class="detail-mini-label">Plano</div><div class="detail-mini-value" id="detail-plano">—</div></div>
+            <div class="detail-mini"><div class="detail-mini-label">Atendente</div><div class="detail-mini-value" id="detail-atendente">—</div></div>
+            <div class="detail-mini"><div class="detail-mini-label">Tempo</div><div class="detail-mini-value" id="detail-tempo">—</div></div>
         </div>
 
         <div class="detail-section">
             <div class="detail-section-label">🎯 Motivo / Processo</div>
             <div class="detail-section-content" id="detail-processo">—</div>
         </div>
-
         <div class="detail-section">
             <div class="detail-section-label">✍️ Resolução completa</div>
             <div class="detail-section-content" id="detail-resolucao">—</div>
         </div>
-
         <div class="detail-section">
             <div class="detail-section-label">📝 Observação</div>
             <div class="detail-section-content" id="detail-obs">—</div>
@@ -1031,13 +862,16 @@
 </div>
 
 <script>
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCJxNaFnzfvWMtMABfxpHoo7bL4XtuHia5ZVNWIt3NsQjGtFsZUhAhKZBGeV_fbxSJrAh2A5OdroYZ/pub?output=csv";
+/* ═════════════════════════════════════════════════════════════════════════
+   CONFIGURAÇÃO — URLs de dados
+   ═════════════════════════════════════════════════════════════════════════ */
+const CSV_URL_ATENDIMENTO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCJxNaFnzfvWMtMABfxpHoo7bL4XtuHia5ZVNWIt3NsQjGtFsZUhAhKZBGeV_fbxSJrAh2A5OdroYZ/pub?output=csv";
+const CSV_URL_SUPORTE     = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCJxNaFnzfvWMtMABfxpHoo7bL4XtuHia5ZVNWIt3NsQjGtFsZUhAhKZBGeV_fbxSJrAh2A5OdroYZ/pub?gid=1419109359&single=true&output=csv";
+const CSV_URL_FERIADOS    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCJxNaFnzfvWMtMABfxpHoo7bL4XtuHia5ZVNWIt3NsQjGtFsZUhAhKZBGeV_fbxSJrAh2A5OdroYZ/pub?gid=596208197&single=true&output=csv";
 
-const CSV_URL_FERIADOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCJxNaFnzfvWMtMABfxpHoo7bL4XtuHia5ZVNWIt3NsQjGtFsZUhAhKZBGeV_fbxSJrAh2A5OdroYZ/pub?gid=596208197&single=true&output=csv";
-
-/* ════════════════════════════════════════════════
-   ENGINE — Feriados
-════════════════════════════════════════════════ */
+/* ═════════════════════════════════════════════════════════════════════════
+   ENGINE — Feriados (compartilhado entre as duas views)
+   ═════════════════════════════════════════════════════════════════════════ */
 class HolidaysEngine {
     constructor(url) {
         this.url = url;
@@ -1082,10 +916,11 @@ class HolidaysEngine {
     }
 }
 const holidaysEngine = new HolidaysEngine(CSV_URL_FERIADOS);
+let feriadosLoaded = false;
 
-/* ════════════════════════════════════════════════
-   ENGINE — Atendimentos
-════════════════════════════════════════════════ */
+/* ═════════════════════════════════════════════════════════════════════════
+   ENGINE — Chamados (usado por Atendimento E Suporte, colunas iguais)
+   ═════════════════════════════════════════════════════════════════════════ */
 class AtendimentoEngine {
     constructor(url) {
         this.url = url;
@@ -1108,14 +943,12 @@ class AtendimentoEngine {
 
     parseDate(s) {
         if (!s) return null;
-        // Aceita "dd/mm/aaaa" ou "dd/mm/aaaa hh:mm[:ss]"
         const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?/);
         if (!m) return null;
         return new Date(+m[3], +m[2]-1, +m[1], +(m[4]||0), +(m[5]||0), +(m[6]||0));
     }
 
     parseSlaContratado(s) {
-        // Formato HH:MM:SS — retorna em minutos
         if (!s) return 0;
         const m = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
         if (!m) return 0;
@@ -1131,13 +964,11 @@ class AtendimentoEngine {
             this.applyFilters();
             return true;
         } catch(e) {
-            console.error('Sync atendimento falhou:', e);
+            console.error('Sync falhou para', this.url, ':', e);
             return false;
         }
     }
 
-    /* Quebra o CSV em linhas REAIS, respeitando aspas.
-       Sem isso, observações com quebras de linha são tratadas como atendimentos novos. */
     splitCsvLines(csv) {
         const linhas = [];
         let cur = '';
@@ -1145,14 +976,13 @@ class AtendimentoEngine {
         for (let i = 0; i < csv.length; i++) {
             const c = csv[i];
             if (c === '"') {
-                // Aspas dupla escapada ("") = aspa literal — pula
                 if (csv[i+1] === '"') { cur += '""'; i++; continue; }
                 inQ = !inQ;
                 cur += c;
                 continue;
             }
             if ((c === '\n' || c === '\r') && !inQ) {
-                if (c === '\r' && csv[i+1] === '\n') i++;  // pula o \n do \r\n
+                if (c === '\r' && csv[i+1] === '\n') i++;
                 if (cur.length > 0) linhas.push(cur);
                 cur = '';
                 continue;
@@ -1167,12 +997,9 @@ class AtendimentoEngine {
         const lines = this.splitCsvLines(csv);
         if (lines.length < 2) { this.data = []; return; }
 
-        // Procura o cabeçalho — primeira linha que tem "Data" + "Protocolo" + "Cidade"
-        // (tolerante a maiúsculas/minúsculas e à nova estrutura com título nas linhas 1-3)
         let headerIdx = -1;
         for (let i = 0; i < Math.min(lines.length, 15); i++) {
             const lineUpper = lines[i].toUpperCase();
-            // Deve ter pelo menos DATA, PROTOCOLO e CIDADE separados por vírgula
             if (/\bDATA\b/.test(lineUpper) && /\bPROTOCOLO\b/.test(lineUpper) && /\bCIDADE\b/.test(lineUpper)) {
                 headerIdx = i;
                 break;
@@ -1181,13 +1008,11 @@ class AtendimentoEngine {
         if (headerIdx === -1) headerIdx = 0;
         const header = this.splitLine(lines[headerIdx]).map(h => h.trim().toUpperCase());
 
-        // Mapeia índices buscando por nome (tolerante à reordenação e variações)
         const find = (keys) => {
             for (const k of keys) {
                 const idx = header.findIndex(h => h === k);
                 if (idx >= 0) return idx;
             }
-            // Match parcial se exato não funcionou
             for (const k of keys) {
                 const idx = header.findIndex(h => h.includes(k));
                 if (idx >= 0) return idx;
@@ -1198,27 +1023,25 @@ class AtendimentoEngine {
         const idx = {
             data:        find(['DATA']),
             protocolo:   find(['PROTOCOLO']),
-            operador:    find(['ATENDENTE', 'OPERADOR']),   // nova planilha usa ATENDENTE; antiga usava OPERADOR
+            operador:    find(['ATENDENTE', 'OPERADOR', 'TÉCNICO', 'TECNICO']),
             canal:       find(['CANAL']),
             nome:        find(['NOME/RESPONSÁVEL', 'NOME/RESPONSAVEL', 'NOME', 'RESPONSAVEL']),
             cnpj:        find(['CNPJ']),
             cidade:      find(['CIDADE']),
             plano:       find(['PLANO']),
-            sla:         find(['SLA CONTRATADO', 'SLA']),    // SLA contratado (formato HH:MM:SS)
+            sla:         find(['SLA CONTRATADO', 'SLA']),
             abertura:    find(['ABERTURA']),
             fechamento:  find(['FECHAMENTO']),
-            tempo:       find(['★ TEMPO ATEND.', 'TEMPO ATEND', 'TEMPO']),  // calculado na planilha
+            tempo:       find(['★ TEMPO ATEND.', 'TEMPO ATEND', 'TEMPO']),
             telefone:    find(['TELEFONE']),
             processo:    find(['PROCESSO']),
             resolucao:   find(['RESOLUÇÃO', 'RESOLUCAO']),
-            status:      find(['STATUS']),                   // NOVO campo
+            status:      find(['STATUS']),
             pos:         find(['PÓS ATENDIMENTO', 'POS ATENDIMENTO', 'PÓS', 'POS']),
             slaCumprido: find(['★ SLA CUMPRIDO', 'SLA CUMPRIDO']),
             obs:         find(['OBSERVAÇÃO', 'OBSERVACAO', 'OBSERVA'])
         };
 
-        // Defensivo: se "SLA" pegou a mesma coluna que "SLA CUMPRIDO" (caso de cabeçalho ambíguo),
-        // procura a primeira ocorrência de algo com "SLA" que NÃO contenha "CUMPR"
         if (idx.sla !== -1 && idx.sla === idx.slaCumprido) {
             for (let i = 0; i < header.length; i++) {
                 if (header[i].includes('SLA') && !header[i].includes('CUMPR')) {
@@ -1229,9 +1052,7 @@ class AtendimentoEngine {
 
         const rawRows = lines.slice(headerIdx + 1).map(line => {
             const v = this.splitLine(line);
-            // Linha inválida se não tem protocolo OU se a coluna data está vazia (linha "fantasma" de planilha)
             if (v.length < 5 || !v[idx.protocolo] || !v[idx.protocolo].trim()) return null;
-            // Pula linhas com texto não-numérico no protocolo (linhas de título/cabeçalho residual)
             const protoStr = (v[idx.protocolo]||'').trim();
             if (!/^\d+/.test(protoStr)) return null;
 
@@ -1257,9 +1078,9 @@ class AtendimentoEngine {
                 telefone:   v[idx.telefone],
                 processo:   this.normalizeProcesso(v[idx.processo]),
                 resolucao:  v[idx.resolucao],
-                status:     (v[idx.status]||'').trim(),              // Aberto / Em Andamento / Resolvido / Cancelado / Reaberto
-                pos:        (v[idx.pos]||'').toUpperCase().trim(),  // COM RETORNO / SEM RETORNO
-                slaCumprido: (v[idx.slaCumprido]||'').trim(),       // "Dentro do SLA" / "Fora do SLA"
+                status:     (v[idx.status]||'').trim(),
+                pos:        (v[idx.pos]||'').toUpperCase().trim(),
+                slaCumprido: (v[idx.slaCumprido]||'').trim(),
                 obs:        v[idx.obs] || '',
                 tempoMinutos: tempoMinutos
             };
@@ -1268,11 +1089,9 @@ class AtendimentoEngine {
         this.data = rawRows;
     }
 
-    // Normaliza nomes de processo (tira espaços extras, ajusta variações comuns)
     normalizeProcesso(s) {
         if (!s) return '';
         let p = s.toUpperCase().trim().replace(/\s+/g, ' ');
-        // "DUVIDA SOBRE O BOLETO" → "DUVIDA SOBRE BOLETO"
         p = p.replace(/^DUVIDA SOBRE O BOLETO$/, 'DUVIDA SOBRE BOLETO');
         return p;
     }
@@ -1295,47 +1114,254 @@ class AtendimentoEngine {
     }
 }
 
-const engine = new AtendimentoEngine(CSV_URL);
-
-/* ════════════════════════════════════════════════
-   UI — render + lógica
-════════════════════════════════════════════════ */
-
+/* ═════════════════════════════════════════════════════════════════════════
+   CONFIGURAÇÕES DAS VIEWS — labels/rotulagens específicas de cada dashboard
+   ═════════════════════════════════════════════════════════════════════════ */
 const BENCHMARKS = {
-    sla:   { excelente: 95, bom: 85 },   // % atendimentos dentro do SLA
-    pos:   { excelente: 90, bom: 80 },   // % avaliação positiva
-    tempo: { excelente: 120, bom: 240 }  // minutos: <120 excelente, <240 bom, ≥240 atenção
+    sla:   { excelente: 95, bom: 85 },
+    pos:   { excelente: 90, bom: 80 },
+    tempo: { excelente: 120, bom: 240 }
 };
 
-const ui = {
-    charts: {},
-
-    fmt(v) {
-        return v.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+const VIEW_CONFIGS = {
+    atendimento: {
+        mode: 'atendimento',
+        prefix: '',
+        instanceVar: 'dashA',
+        viewId: 'view-atendimento',
+        csvUrl: CSV_URL_ATENDIMENTO,
+        headerTitle: 'BI Atendimento',
+        insightsTitle: '💡 Insights 360 — Análise para Otimização',
+        chamadoSingular: 'atendimento',
+        chamadoPlural: 'atendimentos',
+        pulseLabels: {
+            volume: '🎧 Atendimentos no Mês',
+            tempo:  '⏱️ Tempo Médio de Resolução'
+        },
+        kpiLabels: {
+            topMotivo: 'Top Motivo',
+            atendenteChart: 'Distribuição por Atendente'
+        },
+        chartTitles: {
+            evolucao:    'Evolução Diária de Atendimentos',
+            motivos:     'Top Motivos de Atendimento',
+            atendente:   'Distribuição por Atendente'
+        },
+        extraKpis: ['estouro', 'pendentes']  // KPIs específicos de atendimento
     },
+    suporte: {
+        mode: 'suporte',
+        prefix: 'sup-',
+        instanceVar: 'dashS',
+        viewId: 'view-suporte',
+        csvUrl: CSV_URL_SUPORTE,
+        headerTitle: 'BI Suporte',
+        insightsTitle: '🛠️ Insights 360 — Análise Técnica',
+        chamadoSingular: 'chamado',
+        chamadoPlural: 'chamados',
+        pulseLabels: {
+            volume: '🛠️ Chamados de Suporte no Mês',
+            tempo:  '🔧 MTTR — Tempo Médio de Reparo'
+        },
+        kpiLabels: {
+            topMotivo: 'Top Motivo Técnico',
+            atendenteChart: 'Distribuição por Técnico'
+        },
+        chartTitles: {
+            evolucao:    'Evolução Diária de Chamados',
+            motivos:     'Top Motivos Técnicos',
+            atendente:   'Distribuição por Técnico'
+        },
+        extraKpis: ['reabertura', 'reincidencia']  // KPIs específicos de suporte
+    }
+};
 
+/* ═════════════════════════════════════════════════════════════════════════
+   HTML BUILDER — gera o skeleton de uma view a partir do config
+   ═════════════════════════════════════════════════════════════════════════ */
+function buildViewHTML(cfg) {
+    const p = cfg.prefix;
+    const inst = cfg.instanceVar;
+
+    // Monta os 6 KPI cards. Os 4 primeiros são iguais nos dois modos;
+    // os 2 últimos mudam conforme extraKpis.
+    const kpiCards = [
+        `<div class="kpi-card" style="--kpi-accent:var(--purple)">
+            <p class="kpi-label">${cfg.kpiLabels.topMotivo}</p>
+            <p class="kpi-value" id="${p}kpi-top-motivo" style="color:var(--purple);font-size:13px;">—</p>
+            <p class="kpi-sub" id="${p}kpi-top-motivo-sub">0 ${cfg.chamadoPlural}</p>
+        </div>`,
+        `<div class="kpi-card" style="--kpi-accent:var(--primary)">
+            <p class="kpi-label">Top Cidade</p>
+            <p class="kpi-value" id="${p}kpi-top-cidade" style="color:var(--primary);font-size:13px;">—</p>
+            <p class="kpi-sub" id="${p}kpi-top-cidade-sub">0 ${cfg.chamadoPlural}</p>
+        </div>`,
+        `<div class="kpi-card" style="--kpi-accent:var(--teal)">
+            <p class="kpi-label">Top Plano</p>
+            <p class="kpi-value" id="${p}kpi-top-plano" style="color:var(--teal);font-size:13px;">—</p>
+            <p class="kpi-sub" id="${p}kpi-top-plano-sub">0 ${cfg.chamadoPlural}</p>
+        </div>`,
+        `<div class="kpi-card" style="--kpi-accent:var(--warning)">
+            <p class="kpi-label">Pico de Horário</p>
+            <p class="kpi-value" id="${p}kpi-pico" style="color:var(--warning)">—</p>
+            <p class="kpi-sub" id="${p}kpi-pico-sub">aberturas concentradas</p>
+        </div>`
+    ];
+
+    if (cfg.extraKpis.includes('estouro')) {
+        kpiCards.push(`<div class="kpi-card" style="--kpi-accent:var(--danger)">
+            <p class="kpi-label">Estouro Médio do SLA</p>
+            <p class="kpi-value" id="${p}kpi-estouro" style="color:var(--danger)">—</p>
+            <p class="kpi-sub" id="${p}kpi-estouro-sub">nos casos "Fora do SLA"</p>
+        </div>`);
+    }
+    if (cfg.extraKpis.includes('pendentes')) {
+        kpiCards.push(`<div class="kpi-card" style="--kpi-accent:var(--warning)">
+            <p class="kpi-label">Chamados Pendentes</p>
+            <p class="kpi-value" id="${p}kpi-pendentes" style="color:var(--warning)">0</p>
+            <p class="kpi-sub" id="${p}kpi-pendentes-sub">Aberto / Em Andamento / Reaberto</p>
+        </div>`);
+    }
+    if (cfg.extraKpis.includes('reabertura')) {
+        kpiCards.push(`<div class="kpi-card" style="--kpi-accent:var(--danger)">
+            <p class="kpi-label">Taxa de Reabertura</p>
+            <p class="kpi-value" id="${p}kpi-reabertura" style="color:var(--danger)">—</p>
+            <p class="kpi-sub" id="${p}kpi-reabertura-sub">chamados reabertos</p>
+        </div>`);
+    }
+    if (cfg.extraKpis.includes('reincidencia')) {
+        kpiCards.push(`<div class="kpi-card" style="--kpi-accent:var(--warning)">
+            <p class="kpi-label">Reincidência de Cliente</p>
+            <p class="kpi-value" id="${p}kpi-reincidencia" style="color:var(--warning)">—</p>
+            <p class="kpi-sub" id="${p}kpi-reincidencia-sub">clientes com &gt;1 chamado</p>
+        </div>`);
+    }
+
+    return `
+        <div class="main">
+            <!-- Pulso Operacional -->
+            <div class="main-pulse-row" id="${p}main-pulse"></div>
+            <div class="main-pulse-legend">
+                <span><span class="legend-dot" style="background:#34D399"></span> Excelente</span>
+                <span><span class="legend-dot" style="background:#FBBF24"></span> Bom</span>
+                <span><span class="legend-dot" style="background:#F87171"></span> Atenção</span>
+            </div>
+
+            <!-- KPI Strip -->
+            <section class="kpi-strip">
+                ${kpiCards.join('')}
+            </section>
+
+            <!-- Filter Info Bar -->
+            <div id="${p}filter-info-bar" style="display:none;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#FBBF24;font-weight:500;">
+                📅 <strong>Filtros ativos</strong> <span id="${p}filter-info-text"></span>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filter-bar">
+                <div class="filter-item"><label>Início</label><input type="date" id="${p}filter-start" onchange="${inst}.applyFilter()" /></div>
+                <div class="filter-item"><label>Fim</label><input type="date" id="${p}filter-end" onchange="${inst}.applyFilter()" /></div>
+                <div class="filter-item"><label>Cidade</label><select id="${p}filter-cidade" onchange="${inst}.applyFilter()"></select></div>
+                <div class="filter-item"><label>Processo</label><select id="${p}filter-processo" onchange="${inst}.applyFilter()"></select></div>
+                <div class="filter-item"><label>Plano</label><select id="${p}filter-plano" onchange="${inst}.applyFilter()"></select></div>
+                <div class="filter-item"><label>${cfg.mode === 'suporte' ? 'Técnico' : 'Atendente'}</label><select id="${p}filter-operador" onchange="${inst}.applyFilter()"></select></div>
+                <div class="filter-item"><label>Status</label><select id="${p}filter-status" onchange="${inst}.applyFilter()"></select></div>
+                <button class="btn-month-nav" onclick="${inst}.navigateMonth(-1)" title="Mês anterior">◀ Mês Anterior</button>
+                <button class="btn-month-nav" onclick="${inst}.navigateMonth(1)" title="Próximo mês">Próximo Mês ▶</button>
+                <button class="filter-clear" onclick="${inst}.clearFilters()">✕ Limpar Filtros</button>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="chart-grid">
+                <div class="chart-card span8">
+                    <div class="chart-title">${cfg.chartTitles.evolucao}<span class="chart-tag">LINE</span></div>
+                    <div id="${p}chart-evolucao"></div>
+                </div>
+                <div class="chart-card span4">
+                    <div class="chart-title">SLA Cumprido vs Não Cumprido<span class="chart-tag">DONUT</span></div>
+                    <div id="${p}chart-sla"></div>
+                </div>
+
+                <div class="chart-card span6">
+                    <div class="chart-title">${cfg.chartTitles.motivos}<span class="chart-tag">BAR · SCROLL</span></div>
+                    <div class="chart-scroll-container"><div id="${p}chart-motivos" class="chart-inner"></div></div>
+                </div>
+                <div class="chart-card span6">
+                    <div class="chart-title">Top Cidades<span class="chart-tag">BAR · SCROLL</span></div>
+                    <div class="chart-scroll-container"><div id="${p}chart-cidades" class="chart-inner"></div></div>
+                </div>
+
+                <div class="chart-card span12">
+                    <div class="chart-title">Distribuição por Hora do Dia<span class="chart-tag">AREA</span></div>
+                    <div id="${p}chart-horas"></div>
+                </div>
+
+                <div class="chart-card span4">
+                    <div class="chart-title">Retorno do Cliente (PÓS)<span class="chart-tag">DONUT</span></div>
+                    <div id="${p}chart-pos"></div>
+                </div>
+                <div class="chart-card span4">
+                    <div class="chart-title">${cfg.chartTitles.atendente}<span class="chart-tag">DONUT</span></div>
+                    <div id="${p}chart-atendente"></div>
+                </div>
+                <div class="chart-card span4">
+                    <div class="chart-title">Tempo Médio por Plano<span class="chart-tag">BAR</span></div>
+                    <div id="${p}chart-tempo-plano"></div>
+                </div>
+            </div>
+
+            <!-- Insights 360 -->
+            <div class="insights-section">
+                <div class="insights-title">${cfg.insightsTitle}</div>
+                <div class="insights-subtitle">Análises automáticas baseadas nos dados atuais — atualizadas a cada sincronização</div>
+                <div class="insights-grid" id="${p}insights-grid"></div>
+            </div>
+        </div>
+    `;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   DASHBOARD — classe que encapsula toda a lógica de uma view
+   ═════════════════════════════════════════════════════════════════════════ */
+class Dashboard {
+    constructor(cfg) {
+        this.cfg = cfg;
+        this.prefix = cfg.prefix;
+        this.engine = new AtendimentoEngine(cfg.csvUrl);
+        this.charts = {};
+        this._initialFilterApplied = false;
+        this._appliedMonthKey = null;
+        this._lastModalList = null;
+    }
+
+    $(id) { return document.getElementById(this.prefix + id); }
+
+    fmt(v) { return v.toLocaleString('pt-BR', { style:'currency', currency:'BRL' }); }
     fmtTempo(minutos) {
         if (!minutos || minutos <= 0) return '0min';
         if (minutos < 60) return Math.round(minutos) + 'min';
         const h = Math.floor(minutos / 60);
         const m = Math.round(minutos % 60);
         return m === 0 ? `${h}h` : `${h}h${m.toString().padStart(2,'0')}`;
-    },
+    }
 
     async syncAndRender() {
         document.getElementById('loader').classList.remove('hidden');
         document.getElementById('loader').style.display = 'flex';
-        const holiPromise = holidaysEngine.fetch().catch(()=>{});
-        const ok = await engine.sync();
-        await holiPromise;
+
+        // Feriados carrega uma única vez, compartilhado entre as views
+        if (!feriadosLoaded) {
+            await holidaysEngine.fetch().catch(()=>{});
+            feriadosLoaded = true;
+        }
+
+        const ok = await this.engine.sync();
         document.getElementById('update-time').innerText = ok
             ? `Atualizado: ${new Date().toLocaleTimeString('pt-BR').slice(0,8)}`
             : 'Erro ao sincronizar';
+
         this.populateFilters();
 
-        // Define filtro do mês corrente na PRIMEIRA carga E também quando o mês virar automaticamente.
-        // Guarda o mês que foi aplicado por padrão. Se hoje mudou de mês E o filtro atual ainda é o
-        // padrão anterior (não foi customizado), atualiza automaticamente para o novo mês.
         const hojeYM = this._currentMonthKey();
         if (!this._initialFilterApplied) {
             this.setDefaultMonthFilter();
@@ -1343,37 +1369,31 @@ const ui = {
             this._initialFilterApplied = true;
         } else if (this._appliedMonthKey && this._appliedMonthKey !== hojeYM
                    && this._filterIsDefault(this._appliedMonthKey)) {
-            // Virou o mês E o usuário não customizou → atualiza sozinho
-            console.info(`[Auto] Virada de mês detectada: ${this._appliedMonthKey} → ${hojeYM}. Atualizando filtro.`);
+            console.info(`[Auto] Virada de mês: ${this._appliedMonthKey} → ${hojeYM}`);
             this.setDefaultMonthFilter();
             this._appliedMonthKey = hojeYM;
         }
 
         this.updateMonthIndicator();
         this.renderAll();
+
         document.getElementById('loader').classList.add('hidden');
         setTimeout(() => document.getElementById('loader').style.display = 'none', 300);
-    },
+    }
 
-    /* Retorna string "AAAA-MM" do mês corrente do sistema */
     _currentMonthKey() {
         const h = new Date();
         return `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}`;
-    },
+    }
 
-    /* Verifica se o filtro de data atual corresponde exatamente ao mês fornecido (padrão do sistema).
-       Se sim, significa que o usuário não trocou manualmente → pode substituir automático.
-       Se não, o usuário customizou → NÃO mexemos. */
     _filterIsDefault(monthKey) {
         const [y, m] = monthKey.split('-').map(Number);
         const primeiro = `${y}-${String(m).padStart(2,'0')}-01`;
         const ultimoDia = new Date(y, m, 0).getDate();
         const ultimo = `${y}-${String(m).padStart(2,'0')}-${String(ultimoDia).padStart(2,'0')}`;
-        return engine.filters.dateStart === primeiro && engine.filters.dateEnd === ultimo;
-    },
+        return this.engine.filters.dateStart === primeiro && this.engine.filters.dateEnd === ultimo;
+    }
 
-    /* Define o filtro de data para o MÊS CORRENTE por padrão.
-       Chamado apenas na primeira carga do dashboard. */
     setDefaultMonthFilter() {
         const hoje = new Date();
         const ano = hoje.getFullYear();
@@ -1385,24 +1405,22 @@ const ui = {
         const dateStart = toYMD(primeiroDia);
         const dateEnd   = toYMD(ultimoDia);
 
-        document.getElementById('filter-start').value = dateStart;
-        document.getElementById('filter-end').value   = dateEnd;
+        this.$('filter-start').value = dateStart;
+        this.$('filter-end').value   = dateEnd;
 
-        engine.filters.dateStart = dateStart;
-        engine.filters.dateEnd   = dateEnd;
-        engine.applyFilters();
+        this.engine.filters.dateStart = dateStart;
+        this.engine.filters.dateEnd   = dateEnd;
+        this.engine.applyFilters();
         this.updateFilterInfo();
-    },
+    }
 
-    /* Atualiza o badge visual que mostra qual mês/período está sendo visualizado.
-       Aparece ao lado do título "BI Atendimento". */
     updateMonthIndicator() {
         const bar   = document.getElementById('month-indicator');
         const label = document.getElementById('month-indicator-text');
         if (!bar || !label) return;
 
-        const ini = engine.filters.dateStart;
-        const fim = engine.filters.dateEnd;
+        const ini = this.engine.filters.dateStart;
+        const fim = this.engine.filters.dateEnd;
         const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
         if (!ini && !fim) {
@@ -1410,8 +1428,6 @@ const ui = {
             bar.style.display = 'inline-flex';
             return;
         }
-
-        // Detecta se o intervalo é exatamente 1 mês completo
         if (ini && fim) {
             const [yA,mA,dA] = ini.split('-').map(Number);
             const [yB,mB,dB] = fim.split('-').map(Number);
@@ -1422,16 +1438,13 @@ const ui = {
                 return;
             }
         }
-
         const fmt = s => s ? s.split('-').reverse().join('/') : '...';
         label.innerText = `${fmt(ini)} → ${fmt(fim)}`;
         bar.style.display = 'inline-flex';
-    },
+    }
 
-    /* Navegação rápida entre meses (-1 = anterior, +1 = próximo) */
     navigateMonth(direction) {
-        const iniStr = engine.filters.dateStart || document.getElementById('filter-start').value;
-
+        const iniStr = this.engine.filters.dateStart || this.$('filter-start').value;
         let baseAno, baseMes;
         if (iniStr) {
             const [y, m] = iniStr.split('-').map(Number);
@@ -1441,7 +1454,6 @@ const ui = {
             baseAno = hoje.getFullYear();
             baseMes = hoje.getMonth();
         }
-
         const novaData = new Date(baseAno, baseMes + direction, 1);
         const ano = novaData.getFullYear();
         const mes = novaData.getMonth();
@@ -1449,26 +1461,27 @@ const ui = {
         const ultimoDia   = new Date(ano, mes + 1, 0);
         const toYMD = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
-        document.getElementById('filter-start').value = toYMD(primeiroDia);
-        document.getElementById('filter-end').value   = toYMD(ultimoDia);
+        this.$('filter-start').value = toYMD(primeiroDia);
+        this.$('filter-end').value   = toYMD(ultimoDia);
 
-        engine.filters.dateStart = toYMD(primeiroDia);
-        engine.filters.dateEnd   = toYMD(ultimoDia);
-        engine.applyFilters();
+        this.engine.filters.dateStart = toYMD(primeiroDia);
+        this.engine.filters.dateEnd   = toYMD(ultimoDia);
+        this.engine.applyFilters();
         this.updateFilterInfo();
         this.updateMonthIndicator();
         this.renderAll();
-    },
+    }
 
     populateFilters() {
-        const cidades  = [...new Set(engine.data.map(d => d.cidade).filter(Boolean))].sort();
-        const procs    = [...new Set(engine.data.map(d => d.processo).filter(Boolean))].sort();
-        const planos   = [...new Set(engine.data.map(d => d.plano).filter(Boolean))].sort();
-        const operadores = [...new Set(engine.data.map(d => d.operador).filter(Boolean))].sort();
-        const statusList = [...new Set(engine.data.map(d => d.status).filter(Boolean))].sort();
+        const cidades  = [...new Set(this.engine.data.map(d => d.cidade).filter(Boolean))].sort();
+        const procs    = [...new Set(this.engine.data.map(d => d.processo).filter(Boolean))].sort();
+        const planos   = [...new Set(this.engine.data.map(d => d.plano).filter(Boolean))].sort();
+        const operadores = [...new Set(this.engine.data.map(d => d.operador).filter(Boolean))].sort();
+        const statusList = [...new Set(this.engine.data.map(d => d.status).filter(Boolean))].sort();
 
         const fill = (id, items) => {
-            const el = document.getElementById(id);
+            const el = this.$(id);
+            if (!el) return;
             const cur = el.value;
             el.innerHTML = '<option value="">Todos</option>' + items.map(x => `<option value="${x}">${x}</option>`).join('');
             el.value = cur;
@@ -1478,29 +1491,27 @@ const ui = {
         fill('filter-plano', planos);
         fill('filter-operador', operadores);
         fill('filter-status', statusList);
-    },
+    }
 
     applyFilter() {
-        // Debounce: se chamar várias vezes em sequência (ex: digitando data), só renderiza uma vez
         if (this._filterTimer) clearTimeout(this._filterTimer);
         this._filterTimer = setTimeout(() => {
-            engine.filters.dateStart = document.getElementById('filter-start').value;
-            engine.filters.dateEnd   = document.getElementById('filter-end').value;
-            engine.filters.cidade    = document.getElementById('filter-cidade').value;
-            engine.filters.processo  = document.getElementById('filter-processo').value;
-            engine.filters.plano     = document.getElementById('filter-plano').value;
-            engine.filters.operador  = document.getElementById('filter-operador').value;
-            engine.filters.status    = document.getElementById('filter-status').value;
-            engine.applyFilters();
+            this.engine.filters.dateStart = this.$('filter-start').value;
+            this.engine.filters.dateEnd   = this.$('filter-end').value;
+            this.engine.filters.cidade    = this.$('filter-cidade').value;
+            this.engine.filters.processo  = this.$('filter-processo').value;
+            this.engine.filters.plano     = this.$('filter-plano').value;
+            this.engine.filters.operador  = this.$('filter-operador').value;
+            this.engine.filters.status    = this.$('filter-status').value;
+            this.engine.applyFilters();
             this.updateFilterInfo();
             this.updateMonthIndicator();
             this.renderAll();
         }, 100);
-    },
+    }
 
-    /* Indica visualmente quais filtros estão ativos no topo do dashboard */
     updateFilterInfo() {
-        const f = engine.filters;
+        const f = this.engine.filters;
         const partes = [];
         if (f.dateStart || f.dateEnd) {
             const ini = f.dateStart ? f.dateStart.split('-').reverse().join('/') : '...';
@@ -1510,54 +1521,45 @@ const ui = {
         if (f.cidade)   partes.push(`Cidade: ${f.cidade}`);
         if (f.processo) partes.push(`Processo: ${f.processo}`);
         if (f.plano)    partes.push(`Plano: ${f.plano}`);
-        if (f.operador) partes.push(`Atendente: ${f.operador}`);
+        if (f.operador) partes.push(`${this.cfg.mode === 'suporte' ? 'Técnico' : 'Atendente'}: ${f.operador}`);
         if (f.status)   partes.push(`Status: ${f.status}`);
 
-        const bar = document.getElementById('filter-info-bar');
-        const txt = document.getElementById('filter-info-text');
-        if (partes.length === 0) {
-            bar.style.display = 'none';
-        } else {
-            bar.style.display = 'block';
-            txt.innerHTML = '· ' + partes.join(' · ');
-        }
-    },
+        const bar = this.$('filter-info-bar');
+        const txt = this.$('filter-info-text');
+        if (!bar || !txt) return;
+        if (partes.length === 0) { bar.style.display = 'none'; }
+        else { bar.style.display = 'block'; txt.innerHTML = '· ' + partes.join(' · '); }
+    }
 
     clearFilters() {
         ['filter-start','filter-end','filter-cidade','filter-processo','filter-plano','filter-operador','filter-status'].forEach(id => {
-            document.getElementById(id).value = '';
+            const el = this.$(id); if (el) el.value = '';
         });
-        engine.filters = { dateStart:'', dateEnd:'', cidade:'', processo:'', plano:'', operador:'', status:'' };
-        engine.applyFilters();
+        this.engine.filters = { dateStart:'', dateEnd:'', cidade:'', processo:'', plano:'', operador:'', status:'' };
+        this.engine.applyFilters();
         this.updateFilterInfo();
         this.updateMonthIndicator();
         this.renderAll();
-    },
+    }
 
     renderAll() {
-        // Performance: renderiza imediato o que é leve (números, KPIs, pulso)
         this.renderPulse();
         this.renderKPIs();
         this.renderInsights();
-
-        // E renderiza gráficos no próximo "tick" do navegador — não bloqueia a UI
-        // (usuário já vê números/KPIs antes dos gráficos terminarem)
         if (this._chartsTimer) clearTimeout(this._chartsTimer);
         this._chartsTimer = setTimeout(() => this.renderCharts(), 16);
-    },
+    }
 
-    /* ── PULSO OPERACIONAL ── */
+    /* ─── PULSO ─── */
     renderPulse() {
-        const data = engine.filtered;
+        const data = this.engine.filtered;
         const total = data.length;
 
-        // Conta só atendimentos com SLA avaliado (Dentro/Fora) — ignora vazios
         const slaOk    = data.filter(d => d.slaCumprido === 'Dentro do SLA').length;
         const slaFora  = data.filter(d => d.slaCumprido === 'Fora do SLA').length;
         const slaAval  = slaOk + slaFora;
         const pctSla   = slaAval ? (slaOk / slaAval) * 100 : 0;
 
-        // Conta só atendimentos com PÓS avaliado (Verdadeiro/Falso) — ignora vazios
         const posOk    = data.filter(d => d.pos === 'COM RETORNO').length;
         const posNeg   = data.filter(d => d.pos === 'SEM RETORNO').length;
         const posAval  = posOk + posNeg;
@@ -1566,21 +1568,18 @@ const ui = {
         const tempos   = data.map(d => d.tempoMinutos).filter(t => t != null && t > 0).sort((a,b)=>a-b);
         const mediana  = tempos.length ? tempos[Math.floor(tempos.length / 2)] : 0;
 
-        // ── COMPARAÇÃO COM MÊS ANTERIOR ──
-        // Usa o mês mais recente dos dados filtrados como "atual" e o anterior como base
-        const mesesUnicos = [...new Set(engine.data.map(d => d.data ? `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(2,'0')}` : null).filter(Boolean))].sort();
+        // Comparação com mês anterior
+        const mesesUnicos = [...new Set(this.engine.data.map(d => d.data ? `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(2,'0')}` : null).filter(Boolean))].sort();
         const mesAtual = mesesUnicos[mesesUnicos.length-1];
         const mesAnt   = mesesUnicos[mesesUnicos.length-2];
 
         let comparacao = { total:null, sla:null, pos:null, tempo:null };
         if (mesAtual && mesAnt) {
-            const fAtual = engine.data.filter(d => d.data && `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(2,'0')}` === mesAtual);
-            const fAnt   = engine.data.filter(d => d.data && `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(2,'0')}` === mesAnt);
+            const fAtual = this.engine.data.filter(d => d.data && `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(2,'0')}` === mesAtual);
+            const fAnt   = this.engine.data.filter(d => d.data && `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(2,'0')}` === mesAnt);
 
-            // Total
             comparacao.total = { atual: fAtual.length, anterior: fAnt.length };
 
-            // SLA
             const sOkA = fAtual.filter(d => d.slaCumprido === 'Dentro do SLA').length;
             const sFoA = fAtual.filter(d => d.slaCumprido === 'Fora do SLA').length;
             const sAA = sOkA + sFoA;
@@ -1593,7 +1592,6 @@ const ui = {
 
             comparacao.sla = { atual: pctA, anterior: pctB };
 
-            // PÓS
             const pOkA = fAtual.filter(d => d.pos === 'COM RETORNO').length;
             const pNeA = fAtual.filter(d => d.pos === 'SEM RETORNO').length;
             const pAA = pOkA + pNeA;
@@ -1606,7 +1604,6 @@ const ui = {
 
             comparacao.pos = { atual: pAtA, anterior: pAtB };
 
-            // Tempo (mediana)
             const tA = fAtual.map(d => d.tempoMinutos).filter(t => t != null && t > 0).sort((a,b)=>a-b);
             const medA = tA.length ? tA[Math.floor(tA.length/2)] : null;
             const tB = fAnt.map(d => d.tempoMinutos).filter(t => t != null && t > 0).sort((a,b)=>a-b);
@@ -1615,13 +1612,11 @@ const ui = {
             comparacao.tempo = { atual: medA, anterior: medB };
         }
 
-        // Helper pra renderizar comparação (↑↓→)
         const compTxt = (atual, anterior, modo='alto', formatter=null) => {
             if (atual == null || anterior == null) return '';
             const diff = atual - anterior;
             const diffPct = anterior !== 0 ? (diff/anterior*100) : 0;
             const arrow  = Math.abs(diffPct) < 1 ? '→' : (diff > 0 ? '↑' : '↓');
-            // modo='alto' → subir é bom (SLA, PÓS). modo='baixo' → descer é bom (Tempo, volume)
             const isGood = modo === 'alto' ? diff >= 0 : diff <= 0;
             const cor = Math.abs(diffPct) < 1 ? '#94A3B8' : (isGood ? '#34D399' : '#F87171');
             const formatted = formatter ? formatter(Math.abs(diff)) : Math.abs(diffPct).toFixed(0) + '%';
@@ -1643,16 +1638,13 @@ const ui = {
         const sPos   = status(pctPos,  BENCHMARKS.pos);
         const sTempo = status(mediana, BENCHMARKS.tempo, 'baixo');
 
-        // ── Cálculo dos cards de tempo (Dias Úteis e % Mês Transcorrido) ──
-        // IMPORTANTE: usa o MÊS DO FILTRO (o que o usuário selecionou), não o mês dos dados.
-        // Assim quando o filtro é "Julho/2026", mostra 22 dias úteis de julho — mesmo que os dados sejam só de junho.
+        // Cálculo dias úteis
         let mesRefAno, mesRefMes;
-        if (engine.filters.dateStart) {
-            const [y, m] = engine.filters.dateStart.split('-').map(Number);
+        if (this.engine.filters.dateStart) {
+            const [y, m] = this.engine.filters.dateStart.split('-').map(Number);
             mesRefAno = y;
-            mesRefMes = m - 1;  // 0-indexed
+            mesRefMes = m - 1;
         } else {
-            // Sem filtro → usa o mês atual
             const hj = new Date();
             mesRefAno = hj.getFullYear();
             mesRefMes = hj.getMonth();
@@ -1662,7 +1654,6 @@ const ui = {
         const mesmoMes = mesRefAno === agora.getFullYear() && mesRefMes === agora.getMonth();
         const inicioMes = new Date(mesRefAno, mesRefMes, 1);
         const fimMes    = new Date(mesRefAno, mesRefMes + 1, 0);
-        // Data referência: se filtrando o mês atual, é hoje; se filtrando mês passado/futuro, é o último dia do mês
         const dataReferencia = mesmoMes ? agora : fimMes;
 
         const diasUteisTrabalhados = holidaysEngine.countBusinessDays(inicioMes, dataReferencia);
@@ -1677,25 +1668,23 @@ const ui = {
             {
                 emoji:'📅', label:'Dias Úteis',
                 value: `${diasUteisTrabalhados} de ${diasUteisMes}`,
-                status: '',
-                statusColor: '',
+                status: '', statusColor: '',
                 sub: diasRestantes === 0 ? 'último dia útil' : `${diasRestantes} dia${diasRestantes!==1?'s':''} restante${diasRestantes!==1?'s':''}`,
                 cor: '#60A5FA'
             },
             {
                 emoji:'🕐', label:'% Mês Transcorrido',
                 value: `${pctTranscorrido.toFixed(1).replace('.',',')}%`,
-                status: '',
-                statusColor: '',
+                status: '', statusColor: '',
                 sub: `${mesNomeShort} (mês útil)`,
                 cor: '#818CF8'
             },
             {
-                emoji:'🎧', label:'Atendimentos no Mês',
+                emoji: this.cfg.pulseLabels.volume.split(' ')[0],
+                label: this.cfg.pulseLabels.volume.substring(this.cfg.pulseLabels.volume.indexOf(' ')+1),
                 value: total,
-                status: '',
-                statusColor: '',
-                sub: comparacao.total ? compTxt(comparacao.total.atual, comparacao.total.anterior, 'baixo') : `${total} chamado${total!==1?'s':''}`,
+                status: '', statusColor: '',
+                sub: comparacao.total ? compTxt(comparacao.total.atual, comparacao.total.anterior, 'baixo') : `${total} ${total!==1 ? this.cfg.chamadoPlural : this.cfg.chamadoSingular}`,
                 cor: '#2DD4BF'
             },
             {
@@ -1721,19 +1710,20 @@ const ui = {
                 valueColor: posAval ? sPos.cor : '#94A3B8'
             },
             {
-                emoji:'⏱️', label:'Tempo Médio de Resolução',
+                emoji: this.cfg.pulseLabels.tempo.split(' ')[0],
+                label: this.cfg.pulseLabels.tempo.substring(this.cfg.pulseLabels.tempo.indexOf(' ')+1),
                 value: this.fmtTempo(mediana),
                 status: tempos.length ? sTempo.label : '',
                 statusColor: sTempo.cor,
                 sub: comparacao.tempo && comparacao.tempo.atual != null && comparacao.tempo.anterior != null
                     ? compTxt(comparacao.tempo.atual, comparacao.tempo.anterior, 'baixo', diff => this.fmtTempo(diff))
-                    : (tempos.length ? `mediana de ${tempos.length} atendimentos` : 'sem dados'),
+                    : (tempos.length ? `mediana de ${tempos.length} ${tempos.length!==1 ? this.cfg.chamadoPlural : this.cfg.chamadoSingular}` : 'sem dados'),
                 cor: tempos.length ? sTempo.cor : '#94A3B8',
                 valueColor: tempos.length ? sTempo.cor : '#94A3B8'
             }
         ];
 
-        document.getElementById('main-pulse').innerHTML = cards.map(c => `
+        this.$('main-pulse').innerHTML = cards.map(c => `
             <div class="main-pulse-card" style="--pulse-accent:${c.cor}">
                 <div class="main-pulse-label">${c.emoji} ${c.label}</div>
                 <div class="main-pulse-value"${c.valueColor ? ` style="color:${c.valueColor}"` : ''}>${c.value}</div>
@@ -1741,21 +1731,12 @@ const ui = {
                 <div class="main-pulse-sub">${c.sub}</div>
             </div>
         `).join('');
-    },
+    }
 
-    /* ── KPIs ── */
+    /* ─── KPIs ─── */
     renderKPIs() {
-        const data = engine.filtered;
+        const data = this.engine.filtered;
         const total = data.length;
-
-        // Chamados pendentes — status Aberto / Em Andamento / Reaberto
-        const pendentesArr = data.filter(d => /^(ABERTO|EM ANDAMENTO|REABERTO)$/i.test(d.status));
-        const pendentes = pendentesArr.length;
-
-        // Detalha quantos de cada subtipo (pra subtítulo informativo)
-        const abertos = data.filter(d => /^ABERTO$/i.test(d.status)).length;
-        const andamento = data.filter(d => /^EM ANDAMENTO$/i.test(d.status)).length;
-        const reabertos = data.filter(d => /^REABERTO$/i.test(d.status)).length;
 
         // Top motivo
         const motivos = {};
@@ -1772,60 +1753,96 @@ const ui = {
         data.forEach(d => { if (d.plano) planos[d.plano] = (planos[d.plano]||0) + 1; });
         const topPlano = Object.entries(planos).sort((a,b) => b[1] - a[1])[0] || ['—', 0];
 
-        // Pico de horário
+        // Pico horário
         const horas = {};
         data.forEach(d => { if (d.abertura) horas[d.abertura.getHours()] = (horas[d.abertura.getHours()]||0) + 1; });
         const topHora = Object.entries(horas).sort((a,b) => b[1] - a[1])[0];
         const horaTxt = topHora ? `${String(topHora[0]).padStart(2,'0')}h–${String(+topHora[0]+1).padStart(2,'0')}h` : '—';
         const horaQtd = topHora ? topHora[1] : 0;
 
-        // Estouro médio do SLA — quanto tempo (em média) os "Fora do SLA" passaram do prazo
-        const forasSla = data.filter(d => d.slaCumprido === 'Fora do SLA' && d.tempoMinutos != null && d.slaContratadoMin > 0);
-        let estouroTxt = '—', estouroSub = 'nenhum caso "Fora"';
-        if (forasSla.length) {
-            const estouros = forasSla.map(d => d.tempoMinutos - d.slaContratadoMin).filter(x => x > 0);
-            if (estouros.length) {
-                const medEstouro = estouros.reduce((a,b) => a+b, 0) / estouros.length;
-                estouroTxt = this.fmtTempo(medEstouro);
-                estouroSub = `média entre ${forasSla.length} caso${forasSla.length !== 1 ? 's' : ''}`;
+        this.$('kpi-top-motivo').innerText = topMot[0];
+        this.$('kpi-top-motivo-sub').innerText = `${topMot[1]} ${topMot[1] !== 1 ? this.cfg.chamadoPlural : this.cfg.chamadoSingular}`;
+
+        this.$('kpi-top-cidade').innerText = topCid[0];
+        this.$('kpi-top-cidade-sub').innerText = `${topCid[1]} ${topCid[1] !== 1 ? this.cfg.chamadoPlural : this.cfg.chamadoSingular}`;
+
+        this.$('kpi-top-plano').innerText = topPlano[0];
+        this.$('kpi-top-plano-sub').innerText = `${topPlano[1]} ${topPlano[1] !== 1 ? this.cfg.chamadoPlural : this.cfg.chamadoSingular}`;
+
+        this.$('kpi-pico').innerText = horaTxt;
+        this.$('kpi-pico-sub').innerText = horaQtd ? `${horaQtd} aberturas neste horário` : 'sem dados';
+
+        // KPIs específicos de Atendimento
+        if (this.cfg.extraKpis.includes('estouro')) {
+            const forasSla = data.filter(d => d.slaCumprido === 'Fora do SLA' && d.tempoMinutos != null && d.slaContratadoMin > 0);
+            let estouroTxt = '—', estouroSub = 'nenhum caso "Fora"';
+            if (forasSla.length) {
+                const estouros = forasSla.map(d => d.tempoMinutos - d.slaContratadoMin).filter(x => x > 0);
+                if (estouros.length) {
+                    const medEstouro = estouros.reduce((a,b) => a+b, 0) / estouros.length;
+                    estouroTxt = this.fmtTempo(medEstouro);
+                    estouroSub = `média entre ${forasSla.length} caso${forasSla.length !== 1 ? 's' : ''}`;
+                }
+            }
+            this.$('kpi-estouro').innerText = estouroTxt;
+            this.$('kpi-estouro-sub').innerText = estouroSub;
+        }
+
+        if (this.cfg.extraKpis.includes('pendentes')) {
+            const abertos = data.filter(d => /^ABERTO$/i.test(d.status)).length;
+            const andamento = data.filter(d => /^EM ANDAMENTO$/i.test(d.status)).length;
+            const reabertos = data.filter(d => /^REABERTO$/i.test(d.status)).length;
+            const pendentes = abertos + andamento + reabertos;
+
+            this.$('kpi-pendentes').innerText = pendentes;
+            if (pendentes === 0 && data.filter(d => d.status).length === 0) {
+                this.$('kpi-pendentes-sub').innerText = 'sem status preenchido';
+            } else {
+                const partes = [];
+                if (abertos)   partes.push(`${abertos} Aberto${abertos!==1?'s':''}`);
+                if (andamento) partes.push(`${andamento} Em Andamento`);
+                if (reabertos) partes.push(`${reabertos} Reaberto${reabertos!==1?'s':''}`);
+                this.$('kpi-pendentes-sub').innerText = partes.length ? partes.join(' · ') : 'tudo resolvido ✓';
             }
         }
 
-        const $ = id => document.getElementById(id);
-        $('kpi-pendentes').innerText = pendentes;
-        if (pendentes === 0 && data.filter(d => d.status).length === 0) {
-            $('kpi-pendentes-sub').innerText = 'sem status preenchido';
-        } else {
-            const partes = [];
-            if (abertos)   partes.push(`${abertos} Aberto${abertos!==1?'s':''}`);
-            if (andamento) partes.push(`${andamento} Em Andamento`);
-            if (reabertos) partes.push(`${reabertos} Reaberto${reabertos!==1?'s':''}`);
-            $('kpi-pendentes-sub').innerText = partes.length ? partes.join(' · ') : 'tudo resolvido ✓';
+        // KPIs específicos de Suporte
+        if (this.cfg.extraKpis.includes('reabertura')) {
+            const reabertos = data.filter(d => /REABERTO/i.test(d.status)).length;
+            const comStatus = data.filter(d => d.status).length;
+            const pct = comStatus ? (reabertos / comStatus * 100) : 0;
+            this.$('kpi-reabertura').innerText = comStatus ? `${pct.toFixed(1).replace('.',',')}%` : '—';
+            this.$('kpi-reabertura-sub').innerText = comStatus
+                ? `${reabertos} de ${comStatus} chamado${comStatus!==1?'s':''}`
+                : 'sem status preenchido';
         }
 
-        $('kpi-top-motivo').innerText = topMot[0];
-        $('kpi-top-motivo-sub').innerText = `${topMot[1]} atendimento${topMot[1] !== 1 ? 's' : ''}`;
+        if (this.cfg.extraKpis.includes('reincidencia')) {
+            // Agrupa por CNPJ (ou por nome se CNPJ vazio) e conta clientes com >1 chamado
+            const porCliente = {};
+            data.forEach(d => {
+                const key = (d.cnpj && d.cnpj.trim()) || (d.nome && d.nome.trim());
+                if (!key) return;
+                porCliente[key] = (porCliente[key] || 0) + 1;
+            });
+            const totalClientes = Object.keys(porCliente).length;
+            const reincidentes = Object.values(porCliente).filter(v => v > 1).length;
+            const pct = totalClientes ? (reincidentes / totalClientes * 100) : 0;
+            this.$('kpi-reincidencia').innerText = totalClientes ? `${pct.toFixed(1).replace('.',',')}%` : '—';
+            this.$('kpi-reincidencia-sub').innerText = totalClientes
+                ? `${reincidentes} de ${totalClientes} cliente${totalClientes!==1?'s':''}`
+                : 'sem dados';
+        }
+    }
 
-        $('kpi-top-cidade').innerText = topCid[0];
-        $('kpi-top-cidade-sub').innerText = `${topCid[1]} atendimento${topCid[1] !== 1 ? 's' : ''}`;
-
-        $('kpi-top-plano').innerText = topPlano[0];
-        $('kpi-top-plano-sub').innerText = `${topPlano[1]} atendimento${topPlano[1] !== 1 ? 's' : ''}`;
-
-        $('kpi-pico').innerText = horaTxt;
-        $('kpi-pico-sub').innerText = horaQtd ? `${horaQtd} aberturas neste horário` : 'sem dados';
-
-        $('kpi-estouro').innerText = estouroTxt;
-        $('kpi-estouro-sub').innerText = estouroSub;
-    },
-
-    /* ── CHARTS ── */
+    /* ─── CHARTS ─── */
     renderCharts() {
-        const data = engine.filtered;
+        const data = this.engine.filtered;
+        const self = this;
 
-        // ════════════ 1. EVOLUÇÃO DIÁRIA (line/area com markers clicáveis) ════════════
+        // 1. Evolução Diária
         const porDia = {};
-        const idsPorDia = {};  // guarda ids dos atendimentos por dia (pra clique)
+        const idsPorDia = {};
         data.forEach(d => {
             if (!d.data) return;
             const key = d.dataStr;
@@ -1844,22 +1861,22 @@ const ui = {
                 foreColor:'#94A3B8', background:'transparent',
                 animations:{enabled:false},
                 events: {
-                    dataPointSelection: (e,c,cfg) => this.openModal('evolucao', dias[cfg.dataPointIndex], idsPorDia[dias[cfg.dataPointIndex]]),
-                    markerClick:         (e,c,cfg) => this.openModal('evolucao', dias[cfg.dataPointIndex], idsPorDia[dias[cfg.dataPointIndex]]),
+                    dataPointSelection: (e,c,cfg) => self.openModal('evolucao', dias[cfg.dataPointIndex], idsPorDia[dias[cfg.dataPointIndex]]),
+                    markerClick:         (e,c,cfg) => self.openModal('evolucao', dias[cfg.dataPointIndex], idsPorDia[dias[cfg.dataPointIndex]]),
                     click:               (e,c,cfg) => {
                         if (cfg && typeof cfg.dataPointIndex === 'number' && cfg.dataPointIndex >= 0) {
-                            this.openModal('evolucao', dias[cfg.dataPointIndex], idsPorDia[dias[cfg.dataPointIndex]]);
+                            self.openModal('evolucao', dias[cfg.dataPointIndex], idsPorDia[dias[cfg.dataPointIndex]]);
                         }
                     }
                 }
             },
-            series: [{ name:'Atendimentos', data: dias.map(d => porDia[d]) }],
+            series: [{ name: this.cfg.chamadoPlural.charAt(0).toUpperCase() + this.cfg.chamadoPlural.slice(1), data: dias.map(d => porDia[d]) }],
             xaxis: { categories: dias, labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
             yaxis: { labels:{ style:{colors:'#94A3B8',fontSize:'11px'} } },
-            colors: ['#60A5FA'],
+            colors: [this.cfg.mode === 'suporte' ? '#F87171' : '#60A5FA'],
             stroke: { curve:'smooth', width:2.5 },
             fill:   { type:'gradient', gradient:{shadeIntensity:1, opacityFrom:0.3, opacityTo:0} },
-            markers: { size:6, colors:['#60A5FA'], strokeColors:'#1E293B', strokeWidth:2, fillOpacity:1, shape:'circle',
+            markers: { size:6, colors:[this.cfg.mode === 'suporte' ? '#F87171' : '#60A5FA'], strokeColors:'#1E293B', strokeWidth:2, fillOpacity:1, shape:'circle',
                        hover:{size:10, sizeOffset:4} },
             grid: { show: false },
             dataLabels: { enabled:false },
@@ -1869,14 +1886,14 @@ const ui = {
                     const k = dias[dataPointIndex]; if (!k) return '';
                     return `<div style="padding:10px;background:#1E293B;border:1px solid #334155;border-radius:8px;">
                         <div style="font-size:11px;color:#94A3B8;margin-bottom:4px;">${k}</div>
-                        <div style="font-weight:700;color:#fff;">${porDia[k]} atendimento${porDia[k]!==1?'s':''}</div>
+                        <div style="font-weight:700;color:#fff;">${porDia[k]} ${porDia[k]!==1 ? self.cfg.chamadoPlural : self.cfg.chamadoSingular}</div>
                         <div style="font-size:10px;color:#FBBF24;margin-top:6px;font-style:italic;">👆 Clique para ver lista</div>
                     </div>`;
                 }
             }
         });
 
-        // ════════════ 2. SLA DONUT (melhorado) ════════════
+        // 2. SLA Donut
         const slaOkArr   = data.filter(d => d.slaCumprido === 'Dentro do SLA');
         const slaForaArr = data.filter(d => d.slaCumprido === 'Fora do SLA');
         const slaOk = slaOkArr.length, slaFora = slaForaArr.length;
@@ -1889,7 +1906,7 @@ const ui = {
                     dataPointSelection: (e,c,cfg) => {
                         const arr = cfg.dataPointIndex === 0 ? slaOkArr : slaForaArr;
                         const label = cfg.dataPointIndex === 0 ? 'Dentro do SLA' : 'Fora do SLA';
-                        this.openModal('sla', label, arr);
+                        self.openModal('sla', label, arr);
                     }
                 }
             },
@@ -1907,8 +1924,7 @@ const ui = {
                         labels: {
                             show:true,
                             name: { show:true, fontSize:'13px', color:'#94A3B8', fontWeight:600 },
-                            value: { show:true, fontSize:'24px', color:'#fff', fontWeight:700, offsetY:8,
-                                     formatter: v => v },
+                            value: { show:true, fontSize:'24px', color:'#fff', fontWeight:700, offsetY:8, formatter: v => v },
                             total: {
                                 show:true, label:'SLA Atingido', color:'#94A3B8',
                                 fontSize:'12px', fontWeight:600,
@@ -1918,10 +1934,10 @@ const ui = {
                     }
                 }
             },
-            tooltip: { theme:'dark', y:{ formatter: v => `${v} atendimento${v!==1?'s':''}` } }
+            tooltip: { theme:'dark', y:{ formatter: v => `${v} ${v!==1 ? self.cfg.chamadoPlural : self.cfg.chamadoSingular}` } }
         });
 
-        // ════════════ 3. TOP MOTIVOS (bar VERTICAL com scroll horizontal) ════════════
+        // 3. Top Motivos
         const motivos = {};
         const idsPorMotivo = {};
         data.forEach(d => {
@@ -1931,18 +1947,18 @@ const ui = {
         });
         const motivosSorted = Object.entries(motivos).sort((a,b) => b[1]-a[1]);
         const motivosKeys = motivosSorted.map(m => m[0]);
-        // largura dinâmica: 80px por motivo (mínimo do container = 100%)
         const motivosWidth = Math.max(100, motivosSorted.length * 80);
-        document.getElementById('chart-motivos').style.minWidth = motivosWidth + 'px';
+        const motEl = this.$('chart-motivos');
+        if (motEl) motEl.style.minWidth = motivosWidth + 'px';
 
         this.chart('chart-motivos', {
             chart: {
                 type:'bar', height:320, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent',
                 events: {
-                    dataPointSelection: (e,c,cfg) => this.openModal('motivo', motivosKeys[cfg.dataPointIndex], idsPorMotivo[motivosKeys[cfg.dataPointIndex]])
+                    dataPointSelection: (e,c,cfg) => self.openModal('motivo', motivosKeys[cfg.dataPointIndex], idsPorMotivo[motivosKeys[cfg.dataPointIndex]])
                 }
             },
-            series: [{ name:'Atendimentos', data: motivosSorted.map(m => m[1]) }],
+            series: [{ name: self.cfg.chamadoPlural, data: motivosSorted.map(m => m[1]) }],
             xaxis: {
                 categories: motivosKeys,
                 labels:{ style:{colors:'#94A3B8',fontSize:'10px'}, rotate:-30, hideOverlappingLabels:false, trim:false, maxHeight:80 }
@@ -1959,14 +1975,14 @@ const ui = {
                     const k = motivosKeys[dataPointIndex]; if (!k) return '';
                     return `<div style="padding:10px;background:#1E293B;border:1px solid #334155;border-radius:8px;">
                         <div style="font-size:11px;color:#94A3B8;margin-bottom:4px;">${k}</div>
-                        <div style="font-weight:700;color:#fff;">${motivos[k]} atendimento${motivos[k]!==1?'s':''}</div>
+                        <div style="font-weight:700;color:#fff;">${motivos[k]} ${motivos[k]!==1 ? self.cfg.chamadoPlural : self.cfg.chamadoSingular}</div>
                         <div style="font-size:10px;color:#FBBF24;margin-top:6px;font-style:italic;">👆 Clique para ver lista</div>
                     </div>`;
                 }
             }
         });
 
-        // ════════════ 4. TOP CIDADES (bar VERTICAL com scroll horizontal) ════════════
+        // 4. Top Cidades
         const cidades = {};
         const idsPorCidade = {};
         data.forEach(d => {
@@ -1977,16 +1993,17 @@ const ui = {
         const cidSorted = Object.entries(cidades).sort((a,b) => b[1]-a[1]);
         const cidKeys = cidSorted.map(c => c[0]);
         const cidWidth = Math.max(100, cidSorted.length * 80);
-        document.getElementById('chart-cidades').style.minWidth = cidWidth + 'px';
+        const cidEl = this.$('chart-cidades');
+        if (cidEl) cidEl.style.minWidth = cidWidth + 'px';
 
         this.chart('chart-cidades', {
             chart: {
                 type:'bar', height:320, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent',
                 events: {
-                    dataPointSelection: (e,c,cfg) => this.openModal('cidade', cidKeys[cfg.dataPointIndex], idsPorCidade[cidKeys[cfg.dataPointIndex]])
+                    dataPointSelection: (e,c,cfg) => self.openModal('cidade', cidKeys[cfg.dataPointIndex], idsPorCidade[cidKeys[cfg.dataPointIndex]])
                 }
             },
-            series: [{ name:'Atendimentos', data: cidSorted.map(c => c[1]) }],
+            series: [{ name: self.cfg.chamadoPlural, data: cidSorted.map(c => c[1]) }],
             xaxis: {
                 categories: cidKeys,
                 labels:{ style:{colors:'#94A3B8',fontSize:'10px'}, rotate:-30, hideOverlappingLabels:false, trim:false, maxHeight:80 }
@@ -2003,14 +2020,14 @@ const ui = {
                     const k = cidKeys[dataPointIndex]; if (!k) return '';
                     return `<div style="padding:10px;background:#1E293B;border:1px solid #334155;border-radius:8px;">
                         <div style="font-size:11px;color:#94A3B8;margin-bottom:4px;">${k}</div>
-                        <div style="font-weight:700;color:#fff;">${cidades[k]} atendimento${cidades[k]!==1?'s':''}</div>
+                        <div style="font-weight:700;color:#fff;">${cidades[k]} ${cidades[k]!==1 ? self.cfg.chamadoPlural : self.cfg.chamadoSingular}</div>
                         <div style="font-size:10px;color:#FBBF24;margin-top:6px;font-style:italic;">👆 Clique para ver lista</div>
                     </div>`;
                 }
             }
         });
 
-        // ════════════ 5. DISTRIBUIÇÃO POR HORA (formato área igual evolução) ════════════
+        // 5. Distribuição por Hora
         const horasMap = Array(24).fill(0).map(() => []);
         data.forEach(d => { if (d.abertura) horasMap[d.abertura.getHours()].push(d); });
         const horas = horasMap.map(arr => arr.length);
@@ -2021,11 +2038,11 @@ const ui = {
                 type:'area', height:300, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent',
                 animations:{enabled:false},
                 events: {
-                    dataPointSelection: (e,c,cfg) => this.openModal('hora', `${String(cfg.dataPointIndex).padStart(2,'0')}h`, horasMap[cfg.dataPointIndex]),
-                    markerClick:         (e,c,cfg) => this.openModal('hora', `${String(cfg.dataPointIndex).padStart(2,'0')}h`, horasMap[cfg.dataPointIndex]),
+                    dataPointSelection: (e,c,cfg) => self.openModal('hora', `${String(cfg.dataPointIndex).padStart(2,'0')}h`, horasMap[cfg.dataPointIndex]),
+                    markerClick:         (e,c,cfg) => self.openModal('hora', `${String(cfg.dataPointIndex).padStart(2,'0')}h`, horasMap[cfg.dataPointIndex]),
                     click:               (e,c,cfg) => {
                         if (cfg && typeof cfg.dataPointIndex === 'number' && cfg.dataPointIndex >= 0) {
-                            this.openModal('hora', `${String(cfg.dataPointIndex).padStart(2,'0')}h`, horasMap[cfg.dataPointIndex]);
+                            self.openModal('hora', `${String(cfg.dataPointIndex).padStart(2,'0')}h`, horasMap[cfg.dataPointIndex]);
                         }
                     }
                 }
@@ -2053,7 +2070,7 @@ const ui = {
             }
         });
 
-        // ════════════ 6. PÓS DONUT (melhorado, igual SLA) ════════════
+        // 6. PÓS Donut
         const posOkArr  = data.filter(d => d.pos === 'COM RETORNO');
         const posNegArr = data.filter(d => d.pos === 'SEM RETORNO');
         const posOk = posOkArr.length, posNeg = posNegArr.length;
@@ -2066,7 +2083,7 @@ const ui = {
                     dataPointSelection: (e,c,cfg) => {
                         const arr = cfg.dataPointIndex === 0 ? posOkArr : posNegArr;
                         const label = cfg.dataPointIndex === 0 ? 'Com retorno' : 'Sem retorno';
-                        this.openModal('pos', label, arr);
+                        self.openModal('pos', label, arr);
                     }
                 }
             },
@@ -2097,7 +2114,7 @@ const ui = {
             tooltip: { theme:'dark', y:{ formatter: v => `${v} avaliação${v!==1?'ões':''}` } }
         });
 
-        // ════════════ 7. TEMPO MÉDIO POR PLANO ════════════
+        // 7. Tempo Médio por Plano
         const planosTempo = {};
         const idsPorPlano = {};
         data.forEach(d => {
@@ -2117,7 +2134,7 @@ const ui = {
             chart: {
                 type:'bar', height:320, toolbar:{show:false}, foreColor:'#94A3B8', background:'transparent',
                 events: {
-                    dataPointSelection: (e,c,cfg) => this.openModal('plano', planoKeys[cfg.dataPointIndex], idsPorPlano[planoKeys[cfg.dataPointIndex]])
+                    dataPointSelection: (e,c,cfg) => self.openModal('plano', planoKeys[cfg.dataPointIndex], idsPorPlano[planoKeys[cfg.dataPointIndex]])
                 }
             },
             series: [{ name:'Tempo médio (minutos)', data: planosArr.map(p => p[1]) }],
@@ -2133,15 +2150,15 @@ const ui = {
                     const k = planoKeys[dataPointIndex]; if (!k) return '';
                     return `<div style="padding:10px;background:#1E293B;border:1px solid #334155;border-radius:8px;">
                         <div style="font-size:11px;color:#94A3B8;margin-bottom:4px;">${k}</div>
-                        <div style="font-weight:700;color:#fff;">Tempo médio: ${ui.fmtTempo(planosArr[dataPointIndex][1])}</div>
-                        <div style="font-size:11px;color:#60A5FA;">Baseado em ${idsPorPlano[k].length} atendimento${idsPorPlano[k].length!==1?'s':''}</div>
+                        <div style="font-weight:700;color:#fff;">Tempo médio: ${self.fmtTempo(planosArr[dataPointIndex][1])}</div>
+                        <div style="font-size:11px;color:#60A5FA;">Baseado em ${idsPorPlano[k].length} ${idsPorPlano[k].length!==1 ? self.cfg.chamadoPlural : self.cfg.chamadoSingular}</div>
                         <div style="font-size:10px;color:#FBBF24;margin-top:6px;font-style:italic;">👆 Clique para ver lista</div>
                     </div>`;
                 }
             }
         });
 
-        // ════════════ 8. DISTRIBUIÇÃO POR ATENDENTE (donut neutro — sem ranking) ════════════
+        // 8. Distribuição por Atendente/Técnico
         const operadores = {};
         const idsPorOperador = {};
         data.forEach(d => {
@@ -2156,7 +2173,7 @@ const ui = {
             chart: {
                 type:'donut', height:300, foreColor:'#94A3B8', background:'transparent',
                 events: {
-                    dataPointSelection: (e,c,cfg) => this.openModal('atendente', opKeys[cfg.dataPointIndex], idsPorOperador[opKeys[cfg.dataPointIndex]])
+                    dataPointSelection: (e,c,cfg) => self.openModal('atendente', opKeys[cfg.dataPointIndex], idsPorOperador[opKeys[cfg.dataPointIndex]])
                 }
             },
             series: opSorted.map(o => o[1]),
@@ -2183,30 +2200,31 @@ const ui = {
                     }
                 }
             },
-            tooltip: { theme:'dark', y:{ formatter: v => `${v} atendimento${v!==1?'s':''}` } }
+            tooltip: { theme:'dark', y:{ formatter: v => `${v} ${v!==1 ? self.cfg.chamadoPlural : self.cfg.chamadoSingular}` } }
         });
-    },
+    }
 
-    /* ── MODAL — popup com lista filtrada ao clicar em qualquer gráfico ── */
+    /* ─── MODAL ─── */
     openModal(tipo, label, lista) {
         if (!lista || !lista.length) return;
         const titulos = {
-            evolucao:  `Atendimentos do dia ${label}`,
-            sla:       `Atendimentos — ${label}`,
+            evolucao:  `${this.cfg.chamadoPlural.charAt(0).toUpperCase() + this.cfg.chamadoPlural.slice(1)} do dia ${label}`,
+            sla:       `${this.cfg.chamadoPlural.charAt(0).toUpperCase() + this.cfg.chamadoPlural.slice(1)} — ${label}`,
             motivo:    `Motivo: ${label}`,
             cidade:    `Cidade: ${label}`,
             hora:      `Aberturas às ${label}`,
             pos:       `PÓS: ${label}`,
             plano:     `Plano: ${label}`,
-            atendente: `Atendente: ${label}`
+            atendente: `${this.cfg.mode === 'suporte' ? 'Técnico' : 'Atendente'}: ${label}`
         };
         document.getElementById('modal-title').innerText = titulos[tipo] || label;
-        document.getElementById('modal-subtitle').innerText = `${lista.length} atendimento${lista.length !== 1 ? 's' : ''} encontrado${lista.length !== 1 ? 's' : ''}`;
+        document.getElementById('modal-subtitle').innerText = `${lista.length} ${lista.length !== 1 ? this.cfg.chamadoPlural : this.cfg.chamadoSingular} encontrado${lista.length !== 1 ? 's' : ''}`;
 
         const sorted = lista.slice().sort((a,b) => (b.data||0) - (a.data||0));
-        // Guarda referência pra que openDetailModal possa acessar pelo índice
         this._lastModalList = sorted;
+        activeDashboard = this;  // garante que openDetailModal use este dashboard
 
+        const self = this;
         document.getElementById('modal-tbody').innerHTML = sorted.map((d, i) => {
             const slaBadge = d.slaCumprido === 'Dentro do SLA'
                 ? '<span class="badge badge-success">Dentro</span>'
@@ -2223,26 +2241,24 @@ const ui = {
             return `<tr>
                 <td>${d.dataStr || '—'}</td>
                 <td>${d.protocolo || '—'}</td>
-                <td><span class="client-link" onclick="ui.openDetailModal(${i})" title="Ver detalhes completos">${nomeEsc}</span></td>
+                <td><span class="client-link" onclick="openDetailFromShared(${i})" title="Ver detalhes completos">${nomeEsc}</span></td>
                 <td>${d.cidade || '—'}</td>
                 <td>${d.processo || '—'}</td>
                 <td title="${(d.resolucao || '').replace(/"/g, '&quot;')}" style="max-width:280px;font-size:11px;color:#94A3B8;">${resolText}</td>
                 <td>${d.operador || '—'}</td>
-                <td>${this.fmtTempo(d.tempoMinutos)}</td>
+                <td>${self.fmtTempo(d.tempoMinutos)}</td>
                 <td>${slaBadge}</td>
                 <td>${posBadge}</td>
             </tr>`;
         }).join('');
 
         document.getElementById('modal').classList.add('active');
-    },
+    }
 
     closeModal() {
         document.getElementById('modal').classList.remove('active');
-    },
+    }
 
-    /* Sub-modal: ao clicar no nome do cliente dentro do modal,
-       mostra resolução completa + observação detalhada. */
     openDetailModal(idx) {
         const d = (this._lastModalList || [])[idx];
         if (!d) return;
@@ -2274,45 +2290,47 @@ const ui = {
         fillSection('detail-obs',       d.obs);
 
         $('detail-modal').classList.add('active');
-    },
+    }
 
     closeDetailModal() {
         document.getElementById('detail-modal').classList.remove('active');
-    },
+    }
 
     chart(id, opts) {
-        // Performance: se o gráfico já existe, só atualiza os dados (10x mais rápido que destroy+recreate)
-        if (this.charts[id]) {
+        const el = this.$(id);
+        if (!el) return;
+        const chartKey = this.prefix + id;
+        if (this.charts[chartKey]) {
             try {
-                this.charts[id].updateOptions(opts, false, false, false);
+                this.charts[chartKey].updateOptions(opts, false, false, false);
                 return;
             } catch (e) {
-                // Em caso de erro (ex: mudança de tipo de gráfico), fallback pro destroy+recreate
-                this.charts[id].destroy();
+                this.charts[chartKey].destroy();
             }
         }
-        this.charts[id] = new ApexCharts(document.getElementById(id), opts);
-        this.charts[id].render();
-    },
+        this.charts[chartKey] = new ApexCharts(el, opts);
+        this.charts[chartKey].render();
+    }
 
-    /* ── INSIGHTS 360 — análises automáticas pra otimização ── */
+    /* ─── INSIGHTS ─── */
     renderInsights() {
-        const data = engine.filtered;
+        const data = this.engine.filtered;
         const total = data.length;
         const insights = [];
+        const mode = this.cfg.mode;
+        const isSuporte = mode === 'suporte';
 
         if (total === 0) {
-            document.getElementById('insights-grid').innerHTML = `
+            this.$('insights-grid').innerHTML = `
                 <div class="insight-card" style="--insight-accent:#94A3B8;grid-column:1/-1;">
-                    <p>Sem atendimentos no filtro atual para gerar insights.</p>
+                    <p>Sem ${this.cfg.chamadoPlural} no filtro atual para gerar insights.</p>
                 </div>`;
             return;
         }
 
-        // 1. PICO DE HORÁRIO — concentração em janela de horas
+        // ─── INSIGHTS COMUNS ───
         const horas = Array(24).fill(0);
         data.forEach(d => { if (d.abertura) horas[d.abertura.getHours()]++; });
-        // Procura a janela de 3h consecutivas com maior volume
         let maxJanela = 0, inicioJanela = 0;
         for (let h = 0; h <= 21; h++) {
             const soma = horas[h] + horas[h+1] + horas[h+2];
@@ -2322,16 +2340,14 @@ const ui = {
             const pctJanela = (maxJanela / total * 100).toFixed(0);
             if (pctJanela >= 35) {
                 insights.push({
-                    cor: '#FBBF24',
-                    icon: '🕐',
+                    cor: '#FBBF24', icon: '🕐',
                     titulo: 'Concentração em horário de pico',
-                    texto: `<strong>${pctJanela}%</strong> dos atendimentos abrem entre <strong>${String(inicioJanela).padStart(2,'0')}h e ${String(inicioJanela+3).padStart(2,'0')}h</strong> (${maxJanela} de ${total}).`,
-                    acao: '💡 Considerar reforçar o time nesse intervalo ou ajustar a escala de operadores.'
+                    texto: `<strong>${pctJanela}%</strong> dos ${this.cfg.chamadoPlural} abrem entre <strong>${String(inicioJanela).padStart(2,'0')}h e ${String(inicioJanela+3).padStart(2,'0')}h</strong> (${maxJanela} de ${total}).`,
+                    acao: '💡 Considerar reforçar o time nesse intervalo ou ajustar a escala.'
                 });
             }
         }
 
-        // 2. MOTIVO DOMINANTE — algum motivo passa 30%
         const motivos = {};
         data.forEach(d => { if (d.processo) motivos[d.processo] = (motivos[d.processo]||0) + 1; });
         const topMot = Object.entries(motivos).sort((a,b) => b[1]-a[1])[0];
@@ -2339,16 +2355,16 @@ const ui = {
             const pctMot = (topMot[1] / total * 100).toFixed(0);
             if (pctMot >= 25) {
                 insights.push({
-                    cor: '#818CF8',
-                    icon: '🎯',
-                    titulo: 'Motivo dominante de chamados',
-                    texto: `<strong>"${topMot[0]}"</strong> representa <strong>${pctMot}%</strong> dos atendimentos (${topMot[1]} casos).`,
-                    acao: '💡 Avaliar automação/autoatendimento para esse motivo — pode reduzir volume significativo.'
+                    cor: '#818CF8', icon: '🎯',
+                    titulo: isSuporte ? 'Problema técnico dominante' : 'Motivo dominante de chamados',
+                    texto: `<strong>"${topMot[0]}"</strong> representa <strong>${pctMot}%</strong> dos ${this.cfg.chamadoPlural} (${topMot[1]} casos).`,
+                    acao: isSuporte
+                        ? '💡 Investigar causa raiz — pode indicar problema recorrente de infraestrutura, equipamento ou configuração padrão.'
+                        : '💡 Avaliar automação/autoatendimento para esse motivo — pode reduzir volume significativo.'
                 });
             }
         }
 
-        // 3. CONCENTRAÇÃO REGIONAL
         const cidades = {};
         data.forEach(d => { if (d.cidade) cidades[d.cidade] = (cidades[d.cidade]||0) + 1; });
         const topCid = Object.entries(cidades).sort((a,b) => b[1]-a[1])[0];
@@ -2356,16 +2372,17 @@ const ui = {
             const pctCid = (topCid[1] / total * 100).toFixed(0);
             if (pctCid >= 30) {
                 insights.push({
-                    cor: '#60A5FA',
-                    icon: '📍',
-                    titulo: 'Concentração geográfica',
+                    cor: '#60A5FA', icon: '📍',
+                    titulo: isSuporte ? 'Concentração geográfica de problemas' : 'Concentração geográfica',
                     texto: `<strong>${topCid[0]}</strong> concentra <strong>${pctCid}%</strong> da demanda (${topCid[1]} chamados).`,
-                    acao: '💡 Maior peso operacional nessa região — considerar atendimento dedicado ou priorização.'
+                    acao: isSuporte
+                        ? '💡 Investigar infraestrutura local — pode indicar problema regional (POP, backbone, cabeamento) que afeta múltiplos clientes.'
+                        : '💡 Maior peso operacional nessa região — considerar atendimento dedicado ou priorização.'
                 });
             }
         }
 
-        // 4. SLA — desempenho operacional
+        // SLA
         const slaOk = data.filter(d => d.slaCumprido === 'Dentro do SLA').length;
         const slaFora = data.filter(d => d.slaCumprido === 'Fora do SLA').length;
         const slaAval = slaOk + slaFora;
@@ -2373,24 +2390,22 @@ const ui = {
             const pctSla = (slaOk / slaAval * 100);
             if (pctSla >= 95) {
                 insights.push({
-                    cor: '#34D399',
-                    icon: '✅',
+                    cor: '#34D399', icon: '✅',
                     titulo: 'SLA em nível de excelência',
-                    texto: `<strong>${pctSla.toFixed(1).replace('.',',')}%</strong> dos atendimentos avaliados foram resolvidos dentro do prazo contratado.`,
-                    acao: '💡 Manter o padrão operacional. Documentar boas práticas pra escalar a equipe sem perder qualidade.'
+                    texto: `<strong>${pctSla.toFixed(1).replace('.',',')}%</strong> dos ${this.cfg.chamadoPlural} avaliados foram resolvidos dentro do prazo contratado.`,
+                    acao: '💡 Manter o padrão. Documentar boas práticas pra escalar sem perder qualidade.'
                 });
             } else if (pctSla < 85) {
                 insights.push({
-                    cor: '#F87171',
-                    icon: '⚠️',
+                    cor: '#F87171', icon: '⚠️',
                     titulo: 'SLA abaixo do esperado',
-                    texto: `Apenas <strong>${pctSla.toFixed(1).replace('.',',')}%</strong> dos atendimentos cumpriram o SLA. <strong>${slaFora}</strong> ficaram fora do prazo.`,
+                    texto: `Apenas <strong>${pctSla.toFixed(1).replace('.',',')}%</strong> cumpriram o SLA. <strong>${slaFora}</strong> ficaram fora do prazo.`,
                     acao: '💡 Revisar fluxos de priorização e escalonamento. Identificar gargalos nos motivos mais frequentes.'
                 });
             }
         }
 
-        // 5. SATISFAÇÃO (PÓS)
+        // PÓS
         const posOk = data.filter(d => d.pos === 'COM RETORNO').length;
         const posNeg = data.filter(d => d.pos === 'SEM RETORNO').length;
         const posAval = posOk + posNeg;
@@ -2398,24 +2413,22 @@ const ui = {
             const pctPos = (posOk / posAval * 100);
             if (posNeg >= 5) {
                 insights.push({
-                    cor: '#F87171',
-                    icon: '🤔',
+                    cor: '#F87171', icon: '🤔',
                     titulo: 'Clientes sem retorno em volume',
                     texto: `<strong>${posNeg}</strong> clientes <strong>sem retorno</strong> — <strong>${(posNeg/posAval*100).toFixed(0)}%</strong> do total avaliado.`,
-                    acao: '💡 Considerar fluxo de follow-up: cliente sem retorno pode indicar problema mal resolvido ou que ele desistiu de cobrar.'
+                    acao: '💡 Considerar fluxo de follow-up: cliente sem retorno pode indicar problema mal resolvido ou desistência.'
                 });
             } else if (pctPos >= 90) {
                 insights.push({
-                    cor: '#34D399',
-                    icon: '🔁',
+                    cor: '#34D399', icon: '🔁',
                     titulo: 'Retorno do cliente elevado',
                     texto: `<strong>${pctPos.toFixed(1).replace('.',',')}%</strong> dos clientes retornaram para confirmar resolução.`,
-                    acao: '💡 Cliente que retorna está engajado. Boa oportunidade pra coletar depoimentos e pesquisa de NPS.'
+                    acao: '💡 Cliente engajado. Boa oportunidade pra coletar depoimentos e pesquisa de NPS.'
                 });
             }
         }
 
-        // 6. TEMPO DE ATENDIMENTO — outliers críticos
+        // Tempo
         const tempos = data.map(d => ({ d, t: d.tempoMinutos })).filter(x => x.t != null && x.t > 0);
         if (tempos.length) {
             const tArr = tempos.map(x => x.t).sort((a,b)=>a-b);
@@ -2424,25 +2437,89 @@ const ui = {
             const criticos = tempos.filter(x => x.t > mediana * 5).length;
             if (criticos > 0 && maxT > 480) {
                 insights.push({
-                    cor: '#FBBF24',
-                    icon: '⏱️',
+                    cor: '#FBBF24', icon: '⏱️',
                     titulo: 'Casos com tempo crítico',
-                    texto: `<strong>${criticos}</strong> atendimento${criticos!==1?'s':''} com tempo muito acima da mediana. Caso mais longo: <strong>${this.fmtTempo(maxT)}</strong>.`,
-                    acao: '💡 Revisar fluxo de escalonamento para casos críticos. Avaliar se há bloqueio técnico ou processo que pode ser otimizado.'
+                    texto: `<strong>${criticos}</strong> ${criticos!==1 ? this.cfg.chamadoPlural : this.cfg.chamadoSingular} com tempo muito acima da mediana. Caso mais longo: <strong>${this.fmtTempo(maxT)}</strong>.`,
+                    acao: isSuporte
+                        ? '💡 Revisar escalonamento de casos críticos. Avaliar se há dependência de terceiros (infraestrutura, fornecedor) travando resolução.'
+                        : '💡 Revisar fluxo de escalonamento para casos críticos. Avaliar bloqueios técnicos ou de processo.'
                 });
             }
             if (mediana < 120) {
                 insights.push({
-                    cor: '#34D399',
-                    icon: '⚡',
-                    titulo: 'Tempo de resolução ágil',
-                    texto: `Mediana de <strong>${this.fmtTempo(mediana)}</strong> por atendimento — operação enxuta.`,
+                    cor: '#34D399', icon: '⚡',
+                    titulo: isSuporte ? 'MTTR ágil' : 'Tempo de resolução ágil',
+                    texto: `Mediana de <strong>${this.fmtTempo(mediana)}</strong> por ${this.cfg.chamadoSingular} — operação enxuta.`,
                     acao: '💡 Padrão operacional saudável. Documentar processos pra manter ao escalar.'
                 });
             }
         }
 
-        // 7. NÃO PREENCHIDOS — falta de dados nos campos avaliativos
+        // ─── INSIGHTS ESPECÍFICOS DE SUPORTE ───
+        if (isSuporte) {
+            // Taxa de reabertura crítica
+            const reabertos = data.filter(d => /REABERTO/i.test(d.status)).length;
+            const comStatus = data.filter(d => d.status).length;
+            if (comStatus > 0) {
+                const pctReab = (reabertos / comStatus * 100);
+                if (pctReab >= 10) {
+                    insights.push({
+                        cor: '#F87171', icon: '🔄',
+                        titulo: 'Taxa de reabertura alta',
+                        texto: `<strong>${pctReab.toFixed(1).replace('.',',')}%</strong> dos chamados foram reabertos (${reabertos} de ${comStatus}). Indica qualidade de resolução comprometida.`,
+                        acao: '💡 Revisar procedimento de fechamento. Aumentar validação pós-resolução antes de marcar como resolvido.'
+                    });
+                } else if (reabertos > 0 && pctReab < 3) {
+                    insights.push({
+                        cor: '#34D399', icon: '🎯',
+                        titulo: 'Qualidade de resolução alta',
+                        texto: `Apenas <strong>${pctReab.toFixed(1).replace('.',',')}%</strong> de reabertura — chamados resolvidos com qualidade na primeira interação.`,
+                        acao: '💡 Ótimo indicador de first-call resolution. Manter procedimentos de validação.'
+                    });
+                }
+            }
+
+            // Reincidência de cliente
+            const porCliente = {};
+            data.forEach(d => {
+                const key = (d.cnpj && d.cnpj.trim()) || (d.nome && d.nome.trim());
+                if (!key) return;
+                (porCliente[key] = porCliente[key] || []).push(d);
+            });
+            const clientes = Object.entries(porCliente);
+            const reincidentes = clientes.filter(([k, v]) => v.length > 1);
+            if (clientes.length > 0 && reincidentes.length >= 3) {
+                const pctReinc = (reincidentes.length / clientes.length * 100);
+                const cronicos = reincidentes.filter(([k, v]) => v.length >= 3).sort((a,b) => b[1].length - a[1].length);
+                let acao = '💡 Investigar padrão desses clientes — pode indicar problema crônico técnico ou de configuração.';
+                if (cronicos.length > 0) {
+                    const top = cronicos[0];
+                    acao = `💡 <strong>${top[1][0].nome || top[0]}</strong> abriu <strong>${top[1].length} chamados</strong> — investigar causa raiz específica desse cliente.`;
+                }
+                insights.push({
+                    cor: '#FBBF24', icon: '🔁',
+                    titulo: 'Clientes reincidentes identificados',
+                    texto: `<strong>${reincidentes.length}</strong> clientes (<strong>${pctReinc.toFixed(0)}%</strong>) abriram mais de 1 chamado no período. ${cronicos.length > 0 ? `<strong>${cronicos.length}</strong> com 3+ chamados.` : ''}`,
+                    acao: acao
+                });
+            }
+
+            // Cluster técnico de motivo por cidade (problema regional específico)
+            if (topMot && topCid) {
+                const cruzamento = data.filter(d => d.cidade === topCid[0] && d.processo === topMot[0]).length;
+                const pctCruz = topCid[1] > 0 ? (cruzamento / topCid[1] * 100) : 0;
+                if (cruzamento >= 5 && pctCruz >= 40) {
+                    insights.push({
+                        cor: '#F87171', icon: '🌐',
+                        titulo: 'Padrão técnico regional detectado',
+                        texto: `Em <strong>${topCid[0]}</strong>, <strong>${cruzamento}</strong> chamados (<strong>${pctCruz.toFixed(0)}%</strong> da cidade) são do mesmo tipo: "<strong>${topMot[0]}</strong>".`,
+                        acao: '💡 Possível problema de infraestrutura afetando a região. Priorizar inspeção técnica local.'
+                    });
+                }
+            }
+        }
+
+        // Campos vazios
         const semSla = data.filter(d => !d.slaCumprido).length;
         const semPos = data.filter(d => !d.pos).length;
         if (semSla > 0 || semPos > 0) {
@@ -2450,99 +2527,68 @@ const ui = {
             const pct = (max / total * 100).toFixed(0);
             if (pct >= 15) {
                 insights.push({
-                    cor: '#94A3B8',
-                    icon: '📝',
+                    cor: '#94A3B8', icon: '📝',
                     titulo: 'Campos não preenchidos',
                     texto: `<strong>${semSla}</strong> sem SLA Cumprido, <strong>${semPos}</strong> sem PÓS preenchidos.`,
-                    acao: '💡 Reforçar com a equipe a importância de preencher todos os campos — dados ausentes distorcem indicadores.'
+                    acao: '💡 Reforçar preenchimento com a equipe — dados ausentes distorcem indicadores.'
                 });
             }
         }
 
         if (insights.length === 0) {
             insights.push({
-                cor: '#34D399',
-                icon: '✅',
+                cor: '#34D399', icon: '✅',
                 titulo: 'Operação estável',
                 texto: 'Nenhum sinal de alerta nos indicadores principais. Continue monitorando.',
                 acao: '💡 Padrão dentro do esperado em todas as dimensões avaliadas.'
             });
         }
 
-        document.getElementById('insights-grid').innerHTML = insights.map(i => `
+        this.$('insights-grid').innerHTML = insights.map(i => `
             <div class="insight-card" style="--insight-accent:${i.cor}">
                 <h4>${i.icon} ${i.titulo}</h4>
                 <p>${i.texto}</p>
                 <div class="insight-action">${i.acao}</div>
             </div>
         `).join('');
-    },
-
-    /* ── TABELA ── */
-    renderTable() {
-        const data = engine.filtered.slice().sort((a,b) => (b.data||0) - (a.data||0));
-        document.getElementById('table-count').innerText = data.length;
-        const tbody = document.getElementById('data-tbody');
-        if (!data.length) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#94A3B8;padding:24px;">Sem atendimentos no filtro atual</td></tr>';
-            return;
-        }
-        tbody.innerHTML = data.map(d => {
-            const slaBadge = d.slaCumprido === 'Dentro do SLA'
-                ? '<span class="badge badge-success">Dentro</span>'
-                : d.slaCumprido === 'Fora do SLA'
-                    ? '<span class="badge badge-danger">Fora</span>'
-                    : '<span class="badge badge-warning">—</span>';
-            const posBadge = d.pos === 'COM RETORNO'
-                ? '<span class="badge badge-success">Com retorno</span>'
-                : d.pos === 'SEM RETORNO'
-                    ? '<span class="badge badge-danger">Sem retorno</span>'
-                    : '<span class="badge badge-warning">—</span>';
-            return `
-                <tr>
-                    <td>${d.dataStr || '—'}</td>
-                    <td>${d.protocolo || '—'}</td>
-                    <td>${d.nome || '—'}</td>
-                    <td>${d.cidade || '—'}</td>
-                    <td>${d.plano || '—'}</td>
-                    <td>${d.processo || '—'}</td>
-                    <td>${this.fmtTempo(d.tempoMinutos)}</td>
-                    <td>${slaBadge}</td>
-                    <td>${posBadge}</td>
-                </tr>
-            `;
-        }).join('');
-    },
-
-    /* ── Fullscreen ── */
-    toggleFullscreen() {
-        const elem = document.documentElement;
-        const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
-        if (!isFs) {
-            if (elem.requestFullscreen)        elem.requestFullscreen();
-            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-            else if (elem.msRequestFullscreen)     elem.msRequestFullscreen();
-        } else {
-            if (document.exitFullscreen)        document.exitFullscreen();
-            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-            else if (document.msExitFullscreen)     document.msExitFullscreen();
-        }
     }
-};
-
-/* ── Init — aguarda DOM e ApexCharts carregarem ── */
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => ui.syncAndRender());
-} else {
-    ui.syncAndRender();
 }
-/* Auto-refresh inteligente — só roda quando a aba está visível.
-   Evita consumir CPU/banda quando o dashboard está em segundo plano. */
-setInterval(() => {
-    if (document.visibilityState === 'visible') ui.syncAndRender();
-}, 5 * 60 * 1000);
 
-/* ── Fullscreen — atualiza texto do botão ── */
+/* ═════════════════════════════════════════════════════════════════════════
+   INICIALIZAÇÃO — monta as duas views e configura roteamento
+   ═════════════════════════════════════════════════════════════════════════ */
+
+// 1) Popula o HTML das duas views
+document.getElementById('view-atendimento').innerHTML = buildViewHTML(VIEW_CONFIGS.atendimento);
+document.getElementById('view-suporte').innerHTML     = buildViewHTML(VIEW_CONFIGS.suporte);
+
+// 2) Cria as instâncias (expostas globalmente pra os onclicks funcionarem)
+const dashA = new Dashboard(VIEW_CONFIGS.atendimento);
+const dashS = new Dashboard(VIEW_CONFIGS.suporte);
+
+// 3) Referência ao dashboard ativo
+let activeDashboard = dashA;
+
+// 4) Funções globais para os onclicks do header e modais compartilhados
+function syncActive() { activeDashboard.syncAndRender(); }
+function closeSharedModal() { activeDashboard.closeModal(); }
+function closeSharedDetailModal() { activeDashboard.closeDetailModal(); }
+function openDetailFromShared(idx) { activeDashboard.openDetailModal(idx); }
+
+function toggleFullscreen() {
+    const elem = document.documentElement;
+    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+    if (!isFs) {
+        if (elem.requestFullscreen)        elem.requestFullscreen();
+        else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+        else if (elem.msRequestFullscreen)     elem.msRequestFullscreen();
+    } else {
+        if (document.exitFullscreen)        document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        else if (document.msExitFullscreen)     document.msExitFullscreen();
+    }
+}
+
 function updateFullscreenButton() {
     const btn = document.querySelector('.btn-fullscreen');
     if (!btn) return;
@@ -2552,6 +2598,70 @@ function updateFullscreenButton() {
 document.addEventListener('fullscreenchange',       updateFullscreenButton);
 document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
 document.addEventListener('msfullscreenchange',     updateFullscreenButton);
+
+// 5) Troca de view
+function activateView(mode, skipHash) {
+    const target = mode === 'suporte' ? dashS : dashA;
+    if (activeDashboard === target && target._initialFilterApplied) {
+        // Já está ativo e já foi carregado, só garante que a UI está visível
+    }
+    activeDashboard = target;
+
+    // Marca visual
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.view === mode);
+    });
+    document.getElementById('view-atendimento').classList.toggle('active', mode === 'atendimento');
+    document.getElementById('view-suporte').classList.toggle('active', mode === 'suporte');
+
+    // Título e cor de fundo
+    document.getElementById('header-title').innerText = target.cfg.headerTitle;
+    document.body.classList.toggle('view-suporte-active', mode === 'suporte');
+
+    // Hash na URL pra bookmark
+    if (!skipHash) {
+        history.replaceState(null, '', '#' + mode);
+    }
+
+    // Atualiza badge do mês pra refletir os filtros dessa view
+    target.updateMonthIndicator();
+
+    // Carrega se ainda não carregou; senão só re-renderiza (evita fetch redundante)
+    if (!target._initialFilterApplied) {
+        target.syncAndRender();
+    } else {
+        target.renderAll();
+    }
+}
+
+// 6) Init — respeita o hash (#suporte abre direto na view de suporte)
+function initFromHash() {
+    const hash = (location.hash || '').replace('#', '').toLowerCase();
+    if (hash === 'suporte') {
+        activateView('suporte', true);
+    } else {
+        activateView('atendimento', true);
+    }
+    activeDashboard.syncAndRender();
+}
+
+window.addEventListener('hashchange', () => {
+    const hash = (location.hash || '').replace('#', '').toLowerCase();
+    if (hash === 'suporte' || hash === 'atendimento') {
+        activateView(hash, true);
+    }
+});
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFromHash);
+} else {
+    initFromHash();
+}
+
+// 7) Auto-refresh — só atualiza a view ativa e apenas quando aba visível
+setInterval(() => {
+    if (document.visibilityState === 'visible') activeDashboard.syncAndRender();
+}, 5 * 60 * 1000);
 </script>
 </body>
 </html>
