@@ -65,6 +65,21 @@
             letter-spacing: -0.4px;
             color: var(--text-main);
         }
+        /* Badge do mês visualizado — aparece ao lado do título "BI Atendimento" */
+        .month-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: rgba(96, 165, 250, 0.12);
+            border: 1px solid rgba(96, 165, 250, 0.28);
+            color: #93C5FD;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+        }
         .header-sub {
             font-size: 11px;
             color: var(--text-muted);
@@ -321,6 +336,26 @@
             padding: 5px 8px;
         }
         .filter-clear:hover { color: #FCA5A5; }
+
+        /* Botões de navegação de mês (◀ Anterior · Próximo ▶) */
+        .btn-month-nav {
+            background: rgba(96, 165, 250, 0.08);
+            border: 1px solid rgba(96, 165, 250, 0.25);
+            color: #93C5FD;
+            font-size: 10.5px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.15s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-month-nav:hover {
+            background: rgba(96, 165, 250, 0.18);
+            border-color: rgba(96, 165, 250, 0.5);
+        }
 
         /* ─── CHARTS ─── */
         .chart-grid {
@@ -728,7 +763,13 @@
     <div class="header-brand">
         <img class="header-logo" src="Empresas.png" alt="Aonet Empresas" />
         <div>
-            <h1>BI Atendimento</h1>
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                <h1>BI Atendimento</h1>
+                <span id="month-indicator" class="month-indicator" style="display:none;">
+                    <span>📅</span>
+                    <span id="month-indicator-text">—</span>
+                </span>
+            </div>
             <div class="header-sub">
                 <div class="sync-dot"></div>
                 <span id="update-time">Sincronizando...</span>
@@ -820,6 +861,8 @@
             <label>Status</label>
             <select id="filter-status" onchange="ui.applyFilter()"></select>
         </div>
+        <button class="btn-month-nav" onclick="ui.navigateMonth(-1)" title="Mês anterior">◀ Mês Anterior</button>
+        <button class="btn-month-nav" onclick="ui.navigateMonth(1)" title="Próximo mês">Próximo Mês ▶</button>
         <button class="filter-clear" onclick="ui.clearFilters()">✕ Limpar Filtros</button>
     </div>
 
@@ -1289,9 +1332,103 @@ const ui = {
             ? `Atualizado: ${new Date().toLocaleTimeString('pt-BR').slice(0,8)}`
             : 'Erro ao sincronizar';
         this.populateFilters();
+        // Define filtro do mês corrente apenas na PRIMEIRA carga (não sobrescreve filtro manual)
+        if (!this._initialFilterApplied) {
+            this.setDefaultMonthFilter();
+            this._initialFilterApplied = true;
+        }
+        this.updateMonthIndicator();
         this.renderAll();
         document.getElementById('loader').classList.add('hidden');
         setTimeout(() => document.getElementById('loader').style.display = 'none', 300);
+    },
+
+    /* Define o filtro de data para o MÊS CORRENTE por padrão.
+       Chamado apenas na primeira carga do dashboard. */
+    setDefaultMonthFilter() {
+        const hoje = new Date();
+        const ano = hoje.getFullYear();
+        const mes = hoje.getMonth();
+        const primeiroDia = new Date(ano, mes, 1);
+        const ultimoDia   = new Date(ano, mes + 1, 0);
+        const toYMD = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+        const dateStart = toYMD(primeiroDia);
+        const dateEnd   = toYMD(ultimoDia);
+
+        document.getElementById('filter-start').value = dateStart;
+        document.getElementById('filter-end').value   = dateEnd;
+
+        engine.filters.dateStart = dateStart;
+        engine.filters.dateEnd   = dateEnd;
+        engine.applyFilters();
+        this.updateFilterInfo();
+    },
+
+    /* Atualiza o badge visual que mostra qual mês/período está sendo visualizado.
+       Aparece ao lado do título "BI Atendimento". */
+    updateMonthIndicator() {
+        const bar   = document.getElementById('month-indicator');
+        const label = document.getElementById('month-indicator-text');
+        if (!bar || !label) return;
+
+        const ini = engine.filters.dateStart;
+        const fim = engine.filters.dateEnd;
+        const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+        if (!ini && !fim) {
+            label.innerText = 'Todos os períodos';
+            bar.style.display = 'inline-flex';
+            return;
+        }
+
+        // Detecta se o intervalo é exatamente 1 mês completo
+        if (ini && fim) {
+            const [yA,mA,dA] = ini.split('-').map(Number);
+            const [yB,mB,dB] = fim.split('-').map(Number);
+            const ultimoDoMesFim = new Date(yB, mB, 0).getDate();
+            if (yA === yB && mA === mB && dA === 1 && dB === ultimoDoMesFim) {
+                label.innerText = `${meses[mA-1]}/${yA}`;
+                bar.style.display = 'inline-flex';
+                return;
+            }
+        }
+
+        const fmt = s => s ? s.split('-').reverse().join('/') : '...';
+        label.innerText = `${fmt(ini)} → ${fmt(fim)}`;
+        bar.style.display = 'inline-flex';
+    },
+
+    /* Navegação rápida entre meses (-1 = anterior, +1 = próximo) */
+    navigateMonth(direction) {
+        const iniStr = engine.filters.dateStart || document.getElementById('filter-start').value;
+
+        let baseAno, baseMes;
+        if (iniStr) {
+            const [y, m] = iniStr.split('-').map(Number);
+            baseAno = y; baseMes = m - 1;
+        } else {
+            const hoje = new Date();
+            baseAno = hoje.getFullYear();
+            baseMes = hoje.getMonth();
+        }
+
+        const novaData = new Date(baseAno, baseMes + direction, 1);
+        const ano = novaData.getFullYear();
+        const mes = novaData.getMonth();
+        const primeiroDia = new Date(ano, mes, 1);
+        const ultimoDia   = new Date(ano, mes + 1, 0);
+        const toYMD = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+        document.getElementById('filter-start').value = toYMD(primeiroDia);
+        document.getElementById('filter-end').value   = toYMD(ultimoDia);
+
+        engine.filters.dateStart = toYMD(primeiroDia);
+        engine.filters.dateEnd   = toYMD(ultimoDia);
+        engine.applyFilters();
+        this.updateFilterInfo();
+        this.updateMonthIndicator();
+        this.renderAll();
     },
 
     populateFilters() {
@@ -1327,6 +1464,7 @@ const ui = {
             engine.filters.status    = document.getElementById('filter-status').value;
             engine.applyFilters();
             this.updateFilterInfo();
+            this.updateMonthIndicator();
             this.renderAll();
         }, 100);
     },
@@ -1363,6 +1501,7 @@ const ui = {
         engine.filters = { dateStart:'', dateEnd:'', cidade:'', processo:'', plano:'', operador:'', status:'' };
         engine.applyFilters();
         this.updateFilterInfo();
+        this.updateMonthIndicator();
         this.renderAll();
     },
 
