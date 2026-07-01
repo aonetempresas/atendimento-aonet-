@@ -1033,7 +1033,7 @@
 <script>
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCJxNaFnzfvWMtMABfxpHoo7bL4XtuHia5ZVNWIt3NsQjGtFsZUhAhKZBGeV_fbxSJrAh2A5OdroYZ/pub?output=csv";
 
-const CSV_URL_FERIADOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBH6_CprKZd0Go1LZ7ZbqLAiw8di-b3rtYK65Ww0EIuARR17V9sf3KMzg7kJzbB3GBu68lc03MLhaG/pub?gid=409396125&single=true&output=csv";
+const CSV_URL_FERIADOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCJxNaFnzfvWMtMABfxpHoo7bL4XtuHia5ZVNWIt3NsQjGtFsZUhAhKZBGeV_fbxSJrAh2A5OdroYZ/pub?gid=596208197&single=true&output=csv";
 
 /* ════════════════════════════════════════════════
    ENGINE — Feriados
@@ -1332,15 +1332,44 @@ const ui = {
             ? `Atualizado: ${new Date().toLocaleTimeString('pt-BR').slice(0,8)}`
             : 'Erro ao sincronizar';
         this.populateFilters();
-        // Define filtro do mês corrente apenas na PRIMEIRA carga (não sobrescreve filtro manual)
+
+        // Define filtro do mês corrente na PRIMEIRA carga E também quando o mês virar automaticamente.
+        // Guarda o mês que foi aplicado por padrão. Se hoje mudou de mês E o filtro atual ainda é o
+        // padrão anterior (não foi customizado), atualiza automaticamente para o novo mês.
+        const hojeYM = this._currentMonthKey();
         if (!this._initialFilterApplied) {
             this.setDefaultMonthFilter();
+            this._appliedMonthKey = hojeYM;
             this._initialFilterApplied = true;
+        } else if (this._appliedMonthKey && this._appliedMonthKey !== hojeYM
+                   && this._filterIsDefault(this._appliedMonthKey)) {
+            // Virou o mês E o usuário não customizou → atualiza sozinho
+            console.info(`[Auto] Virada de mês detectada: ${this._appliedMonthKey} → ${hojeYM}. Atualizando filtro.`);
+            this.setDefaultMonthFilter();
+            this._appliedMonthKey = hojeYM;
         }
+
         this.updateMonthIndicator();
         this.renderAll();
         document.getElementById('loader').classList.add('hidden');
         setTimeout(() => document.getElementById('loader').style.display = 'none', 300);
+    },
+
+    /* Retorna string "AAAA-MM" do mês corrente do sistema */
+    _currentMonthKey() {
+        const h = new Date();
+        return `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}`;
+    },
+
+    /* Verifica se o filtro de data atual corresponde exatamente ao mês fornecido (padrão do sistema).
+       Se sim, significa que o usuário não trocou manualmente → pode substituir automático.
+       Se não, o usuário customizou → NÃO mexemos. */
+    _filterIsDefault(monthKey) {
+        const [y, m] = monthKey.split('-').map(Number);
+        const primeiro = `${y}-${String(m).padStart(2,'0')}-01`;
+        const ultimoDia = new Date(y, m, 0).getDate();
+        const ultimo = `${y}-${String(m).padStart(2,'0')}-${String(ultimoDia).padStart(2,'0')}`;
+        return engine.filters.dateStart === primeiro && engine.filters.dateEnd === ultimo;
     },
 
     /* Define o filtro de data para o MÊS CORRENTE por padrão.
@@ -1615,17 +1644,26 @@ const ui = {
         const sTempo = status(mediana, BENCHMARKS.tempo, 'baixo');
 
         // ── Cálculo dos cards de tempo (Dias Úteis e % Mês Transcorrido) ──
-        // Usa o mês mais recente dos dados como referência (ou mês atual se não houver dados)
-        const hojeRef = mesAtual
-            ? new Date(+mesAtual.split('-')[0], +mesAtual.split('-')[1]-1, 1)  // primeiro dia do mês de referência
-            : new Date();
-        // Se for o mês atual, usa hoje. Senão, usa o último dia do mês de referência.
-        const agora = new Date();
-        const mesmoMes = hojeRef.getFullYear() === agora.getFullYear() && hojeRef.getMonth() === agora.getMonth();
-        const dataReferencia = mesmoMes ? agora : new Date(hojeRef.getFullYear(), hojeRef.getMonth()+1, 0);
+        // IMPORTANTE: usa o MÊS DO FILTRO (o que o usuário selecionou), não o mês dos dados.
+        // Assim quando o filtro é "Julho/2026", mostra 22 dias úteis de julho — mesmo que os dados sejam só de junho.
+        let mesRefAno, mesRefMes;
+        if (engine.filters.dateStart) {
+            const [y, m] = engine.filters.dateStart.split('-').map(Number);
+            mesRefAno = y;
+            mesRefMes = m - 1;  // 0-indexed
+        } else {
+            // Sem filtro → usa o mês atual
+            const hj = new Date();
+            mesRefAno = hj.getFullYear();
+            mesRefMes = hj.getMonth();
+        }
 
-        const inicioMes = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth(), 1);
-        const fimMes    = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth()+1, 0);
+        const agora = new Date();
+        const mesmoMes = mesRefAno === agora.getFullYear() && mesRefMes === agora.getMonth();
+        const inicioMes = new Date(mesRefAno, mesRefMes, 1);
+        const fimMes    = new Date(mesRefAno, mesRefMes + 1, 0);
+        // Data referência: se filtrando o mês atual, é hoje; se filtrando mês passado/futuro, é o último dia do mês
+        const dataReferencia = mesmoMes ? agora : fimMes;
 
         const diasUteisTrabalhados = holidaysEngine.countBusinessDays(inicioMes, dataReferencia);
         const diasUteisMes         = holidaysEngine.countBusinessDays(inicioMes, fimMes);
@@ -1633,7 +1671,7 @@ const ui = {
         const pctTranscorrido      = diasUteisMes > 0 ? (diasUteisTrabalhados / diasUteisMes) * 100 : 0;
 
         const nomesMeses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
-        const mesNomeShort = `${nomesMeses[dataReferencia.getMonth()]}/${dataReferencia.getFullYear()}`.toLowerCase();
+        const mesNomeShort = `${nomesMeses[mesRefMes]}/${mesRefAno}`.toLowerCase();
 
         const cards = [
             {
