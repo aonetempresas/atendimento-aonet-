@@ -1568,17 +1568,45 @@ class Dashboard {
         const tempos   = data.map(d => d.tempoMinutos).filter(t => t != null && t > 0).sort((a,b)=>a-b);
         const mediana  = tempos.length ? tempos[Math.floor(tempos.length / 2)] : 0;
 
-        // Comparação com mês anterior
-        const mesesUnicos = [...new Set(this.engine.data.map(d => d.data ? `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(2,'0')}` : null).filter(Boolean))].sort();
-        const mesAtual = mesesUnicos[mesesUnicos.length-1];
-        const mesAnt   = mesesUnicos[mesesUnicos.length-2];
+        // ── Comparação vs mês anterior — MESMO PERÍODO/RECORTE ──
+        // A comparação usa o MESMO intervalo de dias no mês anterior:
+        //   filtro 01/07→03/07 é comparado com 01/06→03/06 (mesmos 3 primeiros dias)
+        //   filtro 15/06→20/06 é comparado com 15/05→20/05
+        // Regras:
+        //   1. Se o dia final não existe no mês anterior (ex: 31/03 → fevereiro só vai até 28/29),
+        //      usa o último dia do mês anterior como fim.
+        //   2. Se o filtro está vazio ou incompleto, não mostra comparação.
+        //   3. Se o intervalo equivalente do mês anterior está vazio (sem dados), não mostra.
+        let inicioAtual = null, fimAtual = null;
+        let inicioAnt   = null, fimAnt   = null;
+        if (this.engine.filters.dateStart && this.engine.filters.dateEnd) {
+            const [yA, mA, dA] = this.engine.filters.dateStart.split('-').map(Number);
+            const [yB, mB, dB] = this.engine.filters.dateEnd.split('-').map(Number);
+            inicioAtual = new Date(yA, mA - 1, dA, 0, 0, 0, 0);
+            fimAtual    = new Date(yB, mB - 1, dB, 23, 59, 59, 999);
+
+            // Mês anterior — considera o mês do INÍCIO do filtro como referência
+            const prevInicio = new Date(yA, mA - 2, 1);  // primeiro dia do mês anterior
+            const prevMesAno = prevInicio.getFullYear();
+            const prevMesMes = prevInicio.getMonth();
+            const ultimoDiaPrevMes = new Date(prevMesAno, prevMesMes + 1, 0).getDate();
+
+            // Aplica o mesmo dia de início, mas trata caso o dia não exista no mês anterior
+            const diaIni = Math.min(dA, ultimoDiaPrevMes);
+            const diaFim = Math.min(dB, ultimoDiaPrevMes);
+            inicioAnt = new Date(prevMesAno, prevMesMes, diaIni, 0, 0, 0, 0);
+            fimAnt    = new Date(prevMesAno, prevMesMes, diaFim, 23, 59, 59, 999);
+        }
 
         let comparacao = { total:null, sla:null, pos:null, tempo:null };
-        if (mesAtual && mesAnt) {
-            const fAtual = this.engine.data.filter(d => d.data && `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(2,'0')}` === mesAtual);
-            const fAnt   = this.engine.data.filter(d => d.data && `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(2,'0')}` === mesAnt);
+        if (inicioAtual && fimAtual && inicioAnt && fimAnt) {
+            const fAtual = this.engine.data.filter(d => d.data && d.data >= inicioAtual && d.data <= fimAtual);
+            const fAnt   = this.engine.data.filter(d => d.data && d.data >= inicioAnt   && d.data <= fimAnt);
 
-            comparacao.total = { atual: fAtual.length, anterior: fAnt.length };
+            // Se o mês anterior está vazio, não mostra "vs mês anterior" (evita 100% falso)
+            comparacao.total = fAnt.length > 0
+                ? { atual: fAtual.length, anterior: fAnt.length }
+                : null;
 
             const sOkA = fAtual.filter(d => d.slaCumprido === 'Dentro do SLA').length;
             const sFoA = fAtual.filter(d => d.slaCumprido === 'Fora do SLA').length;
