@@ -634,6 +634,8 @@
             gap: 12px;
             margin-bottom: 20px;
         }
+        .detail-grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .detail-grid-2 { grid-template-columns: repeat(2, 1fr); }
         .detail-mini {
             background: rgba(15,23,42,0.5);
             border: 1px solid var(--card-border);
@@ -652,6 +654,93 @@
             font-size: 13px;
             color: var(--text-main);
             font-weight: 600;
+        }
+        .detail-mini-value.mono {
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.2px;
+        }
+
+        /* Título de bloco dentro do sub-modal (agrupa cards logicamente) */
+        .detail-block-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin: 8px 0 10px 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .detail-block-title:first-child { margin-top: 0; }
+
+        /* Bloco de resultado — SLA e PÓS lado a lado com destaque */
+        .detail-result-row {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+        .detail-result-card {
+            background: rgba(15,23,42,0.5);
+            border: 1px solid var(--card-border);
+            border-left: 3px solid var(--result-accent, var(--text-muted));
+            border-radius: 10px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .detail-result-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        .detail-result-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--result-accent, var(--text-main));
+            line-height: 1.2;
+        }
+        .detail-result-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Barra visual do SLA — mostra quanto do prazo foi consumido */
+        .detail-sla-bar-wrap {
+            width: 100%;
+            height: 8px;
+            background: rgba(148, 163, 184, 0.15);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 2px;
+            position: relative;
+        }
+        .detail-sla-bar {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--sla-bar-color, var(--success));
+            width: 0%;
+            transition: width 0.4s ease-out, background 0.2s;
+        }
+        /* Marcação de "prazo estourado" — hachurado se passou de 100% */
+        .detail-sla-bar.overflow {
+            background: repeating-linear-gradient(
+                45deg,
+                var(--danger),
+                var(--danger) 6px,
+                #B91C1C 6px,
+                #B91C1C 12px
+            );
+        }
+
+        @media (max-width: 700px) {
+            .detail-grid-3 { grid-template-columns: repeat(2, 1fr); }
+            .detail-result-row { grid-template-columns: 1fr; }
         }
 
         /* ─── INSIGHTS 360 ─── */
@@ -837,15 +926,44 @@
             <button class="modal-close" onclick="closeSharedDetailModal()">✕</button>
         </div>
 
-        <div class="detail-grid">
+        <!-- Bloco 1: Identificação do chamado -->
+        <div class="detail-block-title">📋 Identificação do Chamado</div>
+        <div class="detail-grid detail-grid-3">
             <div class="detail-mini"><div class="detail-mini-label">Data</div><div class="detail-mini-value" id="detail-data">—</div></div>
             <div class="detail-mini"><div class="detail-mini-label">Protocolo</div><div class="detail-mini-value" id="detail-protocolo">—</div></div>
+            <div class="detail-mini" id="detail-status-wrap" style="display:none;"><div class="detail-mini-label">Status</div><div class="detail-mini-value" id="detail-status">—</div></div>
             <div class="detail-mini"><div class="detail-mini-label">Cidade</div><div class="detail-mini-value" id="detail-cidade">—</div></div>
             <div class="detail-mini"><div class="detail-mini-label">Plano</div><div class="detail-mini-value" id="detail-plano">—</div></div>
-            <div class="detail-mini"><div class="detail-mini-label">Atendente</div><div class="detail-mini-value" id="detail-atendente">—</div></div>
-            <div class="detail-mini"><div class="detail-mini-label">Tempo</div><div class="detail-mini-value" id="detail-tempo">—</div></div>
+            <div class="detail-mini"><div class="detail-mini-label" id="detail-atendente-label">Atendente</div><div class="detail-mini-value" id="detail-atendente">—</div></div>
         </div>
 
+        <!-- Bloco 2: Tempos do atendimento -->
+        <div class="detail-block-title">⏱️ Atendimento — Tempos</div>
+        <div class="detail-grid detail-grid-2">
+            <div class="detail-mini"><div class="detail-mini-label">Abertura</div><div class="detail-mini-value" id="detail-abertura">—</div></div>
+            <div class="detail-mini"><div class="detail-mini-label">Fechamento</div><div class="detail-mini-value" id="detail-fechamento">—</div></div>
+            <div class="detail-mini"><div class="detail-mini-label">Tempo de Resolução</div><div class="detail-mini-value" id="detail-tempo">—</div></div>
+            <div class="detail-mini"><div class="detail-mini-label">SLA Contratado</div><div class="detail-mini-value" id="detail-sla-contratado">—</div></div>
+        </div>
+
+        <!-- Bloco 3: Resultado do atendimento (SLA + PÓS lado a lado) -->
+        <div class="detail-result-row">
+            <div class="detail-result-card" id="detail-sla-card">
+                <div class="detail-result-label">🚦 SLA Cumprido</div>
+                <div class="detail-result-value" id="detail-sla-status">—</div>
+                <div class="detail-sla-bar-wrap">
+                    <div class="detail-sla-bar" id="detail-sla-bar"></div>
+                </div>
+                <div class="detail-result-sub" id="detail-sla-detail">—</div>
+            </div>
+            <div class="detail-result-card" id="detail-pos-card">
+                <div class="detail-result-label">🔁 Retorno do Cliente (PÓS)</div>
+                <div class="detail-result-value" id="detail-pos-status">—</div>
+                <div class="detail-result-sub" id="detail-pos-sub">Feedback do cliente</div>
+            </div>
+        </div>
+
+        <!-- Bloco 4: Conteúdo do atendimento -->
         <div class="detail-section">
             <div class="detail-section-label">🎯 Motivo / Processo</div>
             <div class="detail-section-content" id="detail-processo">—</div>
@@ -2292,16 +2410,115 @@ class Dashboard {
         if (!d) return;
 
         const $ = id => document.getElementById(id);
+
+        // Formatadores
+        const fmtDateTime = dt => dt
+            ? `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`
+            : '—';
+        const fmtDash = v => (v && String(v).trim()) ? v : '—';
+
+        // ─── Cabeçalho ───
         $('detail-title').innerText = d.nome || '—';
         $('detail-sub').innerText   = d.cnpj ? `CNPJ: ${d.cnpj}` : '';
 
+        // ─── Bloco 1: Identificação ───
         $('detail-data').innerText      = d.dataStr || '—';
         $('detail-protocolo').innerText = d.protocolo || '—';
-        $('detail-cidade').innerText    = d.cidade || '—';
-        $('detail-plano').innerText     = d.plano || '—';
-        $('detail-atendente').innerText = d.operador || '—';
-        $('detail-tempo').innerText     = this.fmtTempo(d.tempoMinutos);
+        $('detail-cidade').innerText    = fmtDash(d.cidade);
+        $('detail-plano').innerText     = fmtDash(d.plano);
+        $('detail-atendente').innerText = fmtDash(d.operador);
+        $('detail-atendente-label').innerText = this.cfg.mode === 'suporte' ? 'Técnico' : 'Atendente';
 
+        // Status — só mostra se preenchido; esconde o card se vazio
+        const statusWrap = $('detail-status-wrap');
+        if (d.status && d.status.trim()) {
+            statusWrap.style.display = '';
+            const st = d.status.toUpperCase();
+            let cor = '#94A3B8';
+            if (/RESOLVIDO/.test(st))       cor = '#34D399';
+            else if (/CANCELADO/.test(st))  cor = '#94A3B8';
+            else if (/REABERTO/.test(st))   cor = '#F87171';
+            else if (/ABERTO|ANDAMENTO/.test(st)) cor = '#FBBF24';
+            $('detail-status').innerText = d.status;
+            $('detail-status').style.color = cor;
+        } else {
+            statusWrap.style.display = 'none';
+        }
+
+        // ─── Bloco 2: Tempos ───
+        $('detail-abertura').innerText   = fmtDateTime(d.abertura);
+        $('detail-fechamento').innerText = fmtDateTime(d.fechamento);
+        $('detail-abertura').classList.add('mono');
+        $('detail-fechamento').classList.add('mono');
+        $('detail-tempo').innerText      = d.tempoMinutos ? this.fmtTempo(d.tempoMinutos) : '—';
+        $('detail-tempo').classList.add('mono');
+        $('detail-sla-contratado').innerText = d.slaContratadoMin > 0 ? this.fmtTempo(d.slaContratadoMin) : '—';
+        $('detail-sla-contratado').classList.add('mono');
+
+        // ─── Bloco 3a: SLA com barra visual ───
+        const slaCard  = $('detail-sla-card');
+        const slaBar   = $('detail-sla-bar');
+        const slaStat  = $('detail-sla-status');
+        const slaDet   = $('detail-sla-detail');
+
+        if (d.slaContratadoMin > 0 && d.tempoMinutos != null && d.tempoMinutos >= 0) {
+            const usoPct = (d.tempoMinutos / d.slaContratadoMin) * 100;
+            const dentro = d.slaCumprido === 'Dentro do SLA' || (d.slaCumprido === '' && usoPct <= 100);
+            const diffMin = d.slaContratadoMin - d.tempoMinutos;
+
+            slaBar.classList.remove('overflow');
+            if (dentro) {
+                slaStat.innerText = 'Dentro do SLA';
+                if (usoPct < 50) {
+                    slaCard.style.setProperty('--result-accent', '#34D399');
+                    slaBar.style.setProperty('--sla-bar-color', '#34D399');
+                    slaDet.innerText = `Sobrou ${this.fmtTempo(diffMin)} de folga · usou ${usoPct.toFixed(0)}% do prazo`;
+                } else if (usoPct < 90) {
+                    slaCard.style.setProperty('--result-accent', '#34D399');
+                    slaBar.style.setProperty('--sla-bar-color', '#34D399');
+                    slaDet.innerText = `Sobrou ${this.fmtTempo(diffMin)} · usou ${usoPct.toFixed(0)}% do prazo`;
+                } else {
+                    slaCard.style.setProperty('--result-accent', '#FBBF24');
+                    slaBar.style.setProperty('--sla-bar-color', '#FBBF24');
+                    slaDet.innerText = `Apertado — usou ${usoPct.toFixed(0)}% do prazo (${this.fmtTempo(diffMin)} de margem)`;
+                }
+                slaBar.style.width = Math.min(usoPct, 100).toFixed(1) + '%';
+            } else {
+                slaCard.style.setProperty('--result-accent', '#F87171');
+                slaStat.innerText = 'Fora do SLA';
+                const estouro = d.tempoMinutos - d.slaContratadoMin;
+                slaBar.classList.add('overflow');
+                slaBar.style.width = '100%';
+                slaDet.innerText = `Estourou o prazo em ${this.fmtTempo(estouro)} · levou ${usoPct.toFixed(0)}% do contratado`;
+            }
+        } else {
+            // Sem dados suficientes pra calcular
+            slaCard.style.setProperty('--result-accent', '#94A3B8');
+            slaBar.style.width = '0%';
+            slaBar.style.setProperty('--sla-bar-color', '#94A3B8');
+            slaStat.innerText = d.slaCumprido || '—';
+            slaDet.innerText = 'SLA contratado ou tempo não informado';
+        }
+
+        // ─── Bloco 3b: PÓS ───
+        const posCard = $('detail-pos-card');
+        const posStat = $('detail-pos-status');
+        const posSub  = $('detail-pos-sub');
+        if (d.pos === 'COM RETORNO') {
+            posCard.style.setProperty('--result-accent', '#34D399');
+            posStat.innerText = 'Com Retorno';
+            posSub.innerText = 'Cliente retornou para confirmar resolução';
+        } else if (d.pos === 'SEM RETORNO') {
+            posCard.style.setProperty('--result-accent', '#F87171');
+            posStat.innerText = 'Sem Retorno';
+            posSub.innerText = 'Cliente não retornou — considerar follow-up';
+        } else {
+            posCard.style.setProperty('--result-accent', '#94A3B8');
+            posStat.innerText = '—';
+            posSub.innerText = 'PÓS não preenchido';
+        }
+
+        // ─── Bloco 4: Conteúdo textual ───
         const fillSection = (id, txt) => {
             const el = $(id);
             if (!txt || !txt.trim()) {
@@ -2312,7 +2529,6 @@ class Dashboard {
                 el.innerText = txt;
             }
         };
-
         fillSection('detail-processo',  d.processo);
         fillSection('detail-resolucao', d.resolucao);
         fillSection('detail-obs',       d.obs);
